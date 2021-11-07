@@ -1,0 +1,37 @@
+import React from "react";
+import { Route, Switch } from "react-router-dom";
+import Banner from "../components/Banner";
+import CheckoutForm from "../components/CheckoutForm";
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
+import HomePage from "../pages/home";
+import ProductPage from "../pages/product";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import Notification from "../components/Notification";
+import { closeNotification } from "../redux/actions/appActions";
+
+interface Props {}
+
+const PublicRoute = (props: Props) => {
+  const dispatch = useAppDispatch();
+  const { notificationMessage, notify } = useAppSelector((state) => state.app);
+  return (
+    <div>
+      <Navbar />
+      <Notification
+        show={notify}
+        setShow={() => dispatch(closeNotification())}
+        message={notificationMessage ?? {}}
+      />
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/product/:id" component={ProductPage} />
+        <Route path="/checkout/:id" component={CheckoutForm} />
+      </Switch>
+      <Banner />
+      <Footer />
+    </div>
+  );
+};
+
+export default PublicRoute;
