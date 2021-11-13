@@ -4,11 +4,7 @@ import ProductDetails from "../../components/ProductDetails";
 interface Props {}
 
 const ProductPage = (props: Props) => {
-  return (
-    <div>
-      <ProductDetails />
-    </div>
-  );
+  return <ProductDetails />;
 };
 
 export default ProductPage;

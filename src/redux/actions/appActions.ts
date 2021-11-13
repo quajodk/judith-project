@@ -18,3 +18,29 @@ export const closeNotification = () => ({
 export const toggleCart = () => ({
   type: types.TOGGLE_CART,
 });
+
+export const signIn = (email: string, password: string) => ({
+  type: types.SIGN_IN,
+  payload: {
+    email,
+    password,
+  },
+});
+
+export const signup = (obj: Record<string, any>) => ({
+  type: types.SIGN_UP,
+  payload: obj,
+});
+
+export const addProduct = (obj: Record<string, any>) => ({
+  type: types.ADD_PRODUCT,
+  payload: obj,
+});
+
+export const persistUser = () => ({
+  type: types.PERSIST_USER,
+});
+
+export const signOut = () => ({
+  type: types.SIGN_OUT,
+});

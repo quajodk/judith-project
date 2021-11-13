@@ -9,8 +9,8 @@ const AppRouter = (props: Props) => {
   return (
     <Router>
       <Switch>
-        <Route exact path="/" component={PublicRoute} />
         <Route path="/admin" component={AdminRoutes} />
+        <Route path="/" component={PublicRoute} />
       </Switch>
     </Router>
   );

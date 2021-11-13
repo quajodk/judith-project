@@ -14,14 +14,24 @@ service cloud.firestore {
     //  allow read, write: if request.time < timestamp.date(2020, 4, 21);
     //}
     
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+    }
+    
     match /users/{userId} {
       allow read, update: if request.auth.uid != null && request.auth.uid == userId;
     	allow create: if request.auth.uid != null;
     }
     
     match /products/{productId} {
-      allow create,update,delete: if request.auth.uid != null;
+      allow create, update, delete: if isAdmin();
     	allow read: if true;
     }
+    
+    match /productsFiles/{productFileId} {
+      allow create, update, delete: if true;
+    	allow read: if true;
+    }
+    
   }
 }

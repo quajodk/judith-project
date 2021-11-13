@@ -10,6 +10,7 @@ interface AppState {
   notificationMessage: Record<string, any> | null;
   openCart: boolean;
   adminUser: IUser | null;
+  currentRoute: string | null;
 }
 
 const initialState: AppState = {
@@ -20,6 +21,7 @@ const initialState: AppState = {
   notificationMessage: null,
   openCart: false,
   adminUser: null,
+  currentRoute: null,
 };
 
 const appReducer = createSlice({
@@ -91,6 +93,16 @@ const appReducer = createSlice({
     toggleCart: (state) => {
       state.openCart = !state.openCart;
     },
+    setAdminUser: (state, action: PayloadAction<IUser>) => {
+      state.adminUser = action.payload;
+    },
+    setRoute: (state, action: PayloadAction<string>) => {
+      state.currentRoute = action.payload;
+    },
+    signOut: (state) => {
+      state.adminUser = null;
+      localStorage.clear();
+    },
   },
 });
 
@@ -101,6 +113,9 @@ export const {
   setNotify,
   setNotificationMassage,
   toggleCart,
+  setAdminUser,
+  setRoute,
+  signOut,
 } = appReducer.actions;
 
 export default appReducer.reducer;

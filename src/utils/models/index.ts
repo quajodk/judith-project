@@ -7,6 +7,9 @@ export interface IProduct {
   description: string;
   isAvailable: boolean;
   color?: string; // optional, changes it promotion tag
+  tags?: string[];
+  currency?: string;
+  productFile?: string;
 }
 
 export interface ICartItem {

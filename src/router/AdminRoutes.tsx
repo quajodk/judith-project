@@ -9,11 +9,12 @@ interface Props {}
 
 const AdminRoutes = (props: Props) => {
   const { adminUser } = useAppSelector((state) => state.app);
+
   return (
     <div className="h-screen w-screen bg-gray-50">
       <Switch>
         <Route exact path="/admin/login" component={AdminLogin} />
-        <PrivateRoute path="/admin/dashboard" user={adminUser}>
+        <PrivateRoute path="/admin/en" user={adminUser}>
           <Dashboard />
         </PrivateRoute>
         <Redirect from="/admin" to="/admin/login" />

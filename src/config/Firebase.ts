@@ -13,6 +13,22 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore/lite";
+import { IProduct } from "../utils/models";
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 class Firebase {
   private app: FirebaseApp = initializeApp(config);
@@ -87,6 +103,52 @@ class Firebase {
 
   public setAuthPersistance = () =>
     setPersistence(this.auth, browserLocalPersistence);
+
+  /**
+   * ** Firestore API **
+   */
+  private db = getFirestore(this.app);
+
+  public addUser = (id: string, user: Record<string, any>) =>
+    setDoc(doc(this.db, "users", id), user);
+
+  public getUser = (id: string) => getDoc(doc(this.db, "users", id));
+
+  public addProduct = (id: string, product: IProduct) =>
+    setDoc(doc(this.db, "products", id), product);
+
+  public addProductFile = async (productFile: Record<string, any>) =>
+    await addDoc(collection(this.db, "productFiles"), productFile);
+
+  /**
+   *  ** Storage API **
+   */
+  private store = getStorage(this.app);
+
+  public uploadToStorage = async ({
+    folder,
+    file,
+  }: {
+    folder: string;
+    file: File;
+  }) => {
+    const storageRef = ref(this.store, folder);
+    const metadata = {
+      contentType: file.type,
+    };
+
+    // upload
+    const uploadTask = await uploadBytesResumable(storageRef, file, metadata);
+    const downloadUrl = await getDownloadURL(uploadTask.ref);
+
+    return { downloadUrl, uploadTask };
+  };
+
+  public deleteFile = async (fileName: string) => {
+    const storageRef = ref(this.store, fileName);
+
+    await deleteObject(storageRef);
+  };
 }
 
 const firebase = new Firebase();

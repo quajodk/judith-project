@@ -15,6 +15,7 @@ interface Props {}
 const PublicRoute = (props: Props) => {
   const dispatch = useAppDispatch();
   const { notificationMessage, notify } = useAppSelector((state) => state.app);
+
   return (
     <div>
       <Navbar />
@@ -24,9 +25,9 @@ const PublicRoute = (props: Props) => {
         message={notificationMessage ?? {}}
       />
       <Switch>
-        <Route exact path="/" component={HomePage} />
         <Route path="/product/:id" component={ProductPage} />
         <Route path="/checkout/:id" component={CheckoutForm} />
+        <Route path="/" component={HomePage} />
       </Switch>
       <Banner />
       <Footer />
