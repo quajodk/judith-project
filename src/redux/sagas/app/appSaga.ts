@@ -1,6 +1,7 @@
 import { IProduct, IUser } from "./../../../utils/models/index";
 import {
   ADD_PRODUCT,
+  AUTH_STATE_CHANGE,
   CLOSE_NOTIFICATION,
   PERSIST_USER,
   REMOVE_FROM_CART,
@@ -23,7 +24,7 @@ import {
   toggleCart,
 } from "../../reducers/app/appReducer";
 import firebase from "../../../config/Firebase";
-import { UserCredential } from "@firebase/auth";
+import { User, UserCredential } from "@firebase/auth";
 import {
   DocumentReference,
   DocumentSnapshot,
@@ -130,6 +131,28 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
     case SIGN_OUT:
       yield call(firebase.signOut);
       yield put(signOut());
+      break;
+    case AUTH_STATE_CHANGE:
+      try {
+        const result: User | null = yield call(firebase.onAuthStateChanged);
+
+        yield console.log(result);
+
+        if (result) {
+          const doc: DocumentSnapshot = yield call(
+            firebase.getUser,
+            result.uid
+          );
+
+          if (doc.exists()) {
+            const user: IUser = doc.data() as IUser;
+            yield put(setAdminUser(user));
+            // yield put(setRoute(ROUTE_TO_DASHBOARD));
+          }
+        }
+      } catch (error) {
+        yield console.log(error);
+      }
       break;
     default:
       yield console.log("its mean saga is working");

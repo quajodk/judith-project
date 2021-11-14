@@ -96,7 +96,7 @@ class Firebase {
         if (user) {
           resolve(user);
         } else {
-          reject(new Error("Auth State Changed failed"));
+          reject(null);
         }
       });
     });
@@ -118,7 +118,7 @@ class Firebase {
     setDoc(doc(this.db, "products", id), product);
 
   public addProductFile = async (productFile: Record<string, any>) =>
-    await addDoc(collection(this.db, "productFiles"), productFile);
+    await addDoc(collection(this.db, "files"), productFile);
 
   /**
    *  ** Storage API **

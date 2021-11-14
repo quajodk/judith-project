@@ -13,3 +13,4 @@ export const SIGN_UP = "SIGN_UP";
 export const ROUTE_TO_DASHBOARD = "ROUTE_TO_DASHBOARD";
 export const ADD_PRODUCT = "ADD_PRODUCT";
 export const PERSIST_USER = "PERSIST_USER";
+export const AUTH_STATE_CHANGE = "AUTH_STATE_CHANGE";

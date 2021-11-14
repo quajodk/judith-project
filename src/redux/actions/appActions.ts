@@ -44,3 +44,7 @@ export const persistUser = () => ({
 export const signOut = () => ({
   type: types.SIGN_OUT,
 });
+
+export const authStateChange = () => ({
+  type: types.AUTH_STATE_CHANGE,
+});

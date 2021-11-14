@@ -1,6 +1,7 @@
 import {
   ADD_PRODUCT,
   ADD_TO_CART,
+  AUTH_STATE_CHANGE,
   CLOSE_NOTIFICATION,
   PERSIST_USER,
   REMOVE_FROM_CART,
@@ -22,6 +23,7 @@ function* rootSaga() {
       ADD_PRODUCT,
       PERSIST_USER,
       SIGN_OUT,
+      AUTH_STATE_CHANGE,
     ],
     appSaga
   );
