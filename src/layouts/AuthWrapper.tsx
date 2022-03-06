@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
+import PageLoader from "../components/PageLoader";
 import { authStateChange } from "../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
@@ -8,18 +9,16 @@ interface Props {
 
 const AuthWrapper = ({ children }: Props) => {
   const dispatch = useAppDispatch();
-  const { adminUser } = useAppSelector((state) => state.app);
-  const [loading, setLoading] = useState(true);
+  const { adminUser, isAuthenticating } = useAppSelector((state) => state.app);
 
   const init = useRef({ dispatch });
 
   useEffect(() => {
     const { dispatch } = init.current;
     if (!adminUser) dispatch(authStateChange());
-    else setLoading(false);
   }, [adminUser]);
 
-  if (loading) return <div>Loading...</div>;
+  if (isAuthenticating) return <PageLoader />;
 
   return <>{children}</>;
 };

@@ -29,7 +29,7 @@ const PublicRoute = (props: Props) => {
         <Route path="/checkout/:id" component={CheckoutForm} />
         <Route path="/" component={HomePage} />
       </Switch>
-      <Banner />
+      {/* <Banner /> */}
       <Footer />
     </div>
   );

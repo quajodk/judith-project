@@ -38,6 +38,7 @@ export default function AddProduct(prop: Props) {
     const product = {
       id,
       ...productObj,
+      price: parseFloat(productObj.price),
       currency: currency ?? "GHS",
       tags,
       productFile: productFileUrl,

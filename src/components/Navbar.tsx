@@ -31,7 +31,7 @@ export default function Navbar() {
                       alt="omega vendor list"
                     />
                     <img
-                      className="hidden lg:block h-8 w-auto"
+                      className="hidden lg:block h-16 w-auto"
                       src={Logo}
                       alt="omega vendor list"
                     />
@@ -118,9 +118,9 @@ export default function Navbar() {
                     />
                   </button>
                   {cartItems !== 0 && (
-                    <span className="text-sm text-gray-500 bg-gray-100 p-1 rounded-full">
+                    <div className="text-sm text-gray-500 bg-purple-200 p-1 rounded-full">
                       {cartItems}
-                    </span>
+                    </div>
                   )}
                 </div>
               </div>

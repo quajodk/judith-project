@@ -1,18 +1,18 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
-import reducers from "./reducers/rootReducer";
 import rootSaga from "./sagas/rootSage";
-
-const sagaMiddleware = createSagaMiddleware();
-
-const store = configureStore({
-  reducer: reducers,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),
-  devTools: process.env.NODE_ENV !== "production",
-});
-
-sagaMiddleware.run(rootSaga);
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import reducers from "./reducers/rootReducer";
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
@@ -23,4 +23,29 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   Action<string>
 >;
 
-export default store;
+const sagaMiddleware = createSagaMiddleware();
+
+const persistConfig = {
+  key: "root",
+  storage,
+};
+
+const persistedReducers = persistReducer<any, any>(persistConfig, reducers);
+
+const store = configureStore({
+  reducer: persistedReducers,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(sagaMiddleware),
+  devTools: process.env.NODE_ENV !== "production",
+});
+
+const persistor = persistStore(store);
+
+sagaMiddleware.run(rootSaga);
+
+export { store as default, persistor };

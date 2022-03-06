@@ -3,6 +3,7 @@ import { uuid } from "uuidv4";
 import { IOrder, IProduct, IUser } from "../../../utils/models";
 
 interface AppState {
+  product: IProduct | null;
   products: IProduct[];
   cart: IOrder | null;
   totalCartItems: number;
@@ -11,10 +12,15 @@ interface AppState {
   openCart: boolean;
   adminUser: IUser | null;
   currentRoute: string | null;
+  isAuthenticating: boolean;
+  lastDocRef: any | null;
+  total: number;
+  paymentSuccess: boolean;
 }
 
 const initialState: AppState = {
   products: [],
+  product: null,
   cart: null,
   totalCartItems: 0,
   notify: false,
@@ -22,6 +28,10 @@ const initialState: AppState = {
   openCart: false,
   adminUser: null,
   currentRoute: null,
+  isAuthenticating: true,
+  lastDocRef: null,
+  total: 0,
+  paymentSuccess: false,
 };
 
 const appReducer = createSlice({
@@ -29,7 +39,9 @@ const appReducer = createSlice({
   initialState,
   reducers: {
     addProduct: (state, action) => {
-      state.products = [action.payload, ...state.products];
+      state.products = [...action.payload.products, ...state.products];
+      state.lastDocRef = action.payload.lastDocRef;
+      state.total = action.payload.total;
     },
     addToCart: (state, action: PayloadAction<IProduct>) => {
       const product = action.payload;
@@ -103,6 +115,19 @@ const appReducer = createSlice({
       state.adminUser = null;
       localStorage.clear();
     },
+    setIsAuthenticating: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticating = action.payload;
+    },
+    setProduct: (state, action: PayloadAction<IProduct>) => {
+      state.product = action.payload;
+    },
+    clearCart: (state) => {
+      state.cart = null;
+      state.totalCartItems = 0;
+    },
+    setPaymentSuccess: (state, action: PayloadAction<boolean>) => {
+      state.paymentSuccess = action.payload;
+    },
   },
 });
 
@@ -116,6 +141,10 @@ export const {
   setAdminUser,
   setRoute,
   signOut,
+  setIsAuthenticating,
+  setProduct,
+  clearCart,
+  setPaymentSuccess,
 } = appReducer.actions;
 
 export default appReducer.reducer;

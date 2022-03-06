@@ -12,14 +12,21 @@ import {
   updateEmail,
   setPersistence,
   browserLocalPersistence,
+  signInAnonymously,
 } from "firebase/auth";
 import {
   addDoc,
   collection,
   doc,
+  DocumentReference,
   getDoc,
+  getDocs,
   getFirestore,
+  limit,
+  orderBy,
+  query,
   setDoc,
+  startAfter,
 } from "firebase/firestore/lite";
 import { IProduct } from "../utils/models";
 import {
@@ -43,6 +50,8 @@ class Firebase {
 
   public signIn = (email: string, password: string) =>
     signInWithEmailAndPassword(this.auth, email, password);
+
+  public signInAnonymously = () => signInAnonymously(this.auth);
 
   public signOut = () => this.auth.signOut();
 
@@ -117,8 +126,69 @@ class Firebase {
   public addProduct = (id: string, product: IProduct) =>
     setDoc(doc(this.db, "products", id), product);
 
+  public getProduct = async (id: string) =>
+    await getDoc(doc(this.db, "products", id));
+
   public addProductFile = async (productFile: Record<string, any>) =>
     await addDoc(collection(this.db, "files"), productFile);
+
+  public getProductFile = async (id: string) =>
+    await getDoc(doc(this.db, "files", id));
+
+  public orderProduct = async (order: Record<string, any>) =>
+    await addDoc(collection(this.db, "orders"), order);
+
+  public sendMail = async (mail: Record<string, any>) =>
+    await addDoc(collection(this.db, "mails"), mail);
+
+  public getProducts = (lastDocRef?: DocumentReference) => {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        if (lastDocRef) {
+          try {
+            const docQuery = query(
+              collection(this.db, "products"),
+              orderBy("id"),
+              startAfter(lastDocRef),
+              limit(10)
+            );
+
+            const snapshot = await getDocs(docQuery);
+            const products = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
+            resolve({ products, lastDoc });
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          try {
+            const totalQuery = query(collection(this.db, "products"));
+            const total = await getDocs(totalQuery);
+            const docQuery = query(
+              collection(this.db, "products"),
+              orderBy("id"),
+              limit(10)
+            );
+
+            const snapshot = await getDocs(docQuery);
+            const products = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
+            resolve({ products, lastDoc, total });
+          } catch (error) {
+            reject(error);
+          }
+        }
+      })();
+    });
+  };
 
   /**
    *  ** Storage API **

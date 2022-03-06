@@ -3,6 +3,9 @@ import {
   ADD_TO_CART,
   AUTH_STATE_CHANGE,
   CLOSE_NOTIFICATION,
+  GET_PRODUCT,
+  GET_PRODUCTS,
+  ORDER_PRODUCT,
   PERSIST_USER,
   REMOVE_FROM_CART,
   SIGN_IN,
@@ -24,6 +27,9 @@ function* rootSaga() {
       PERSIST_USER,
       SIGN_OUT,
       AUTH_STATE_CHANGE,
+      GET_PRODUCTS,
+      ORDER_PRODUCT,
+      GET_PRODUCT,
     ],
     appSaga
   );

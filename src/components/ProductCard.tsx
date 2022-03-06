@@ -29,7 +29,7 @@ const ProductCard = (props: Props) => {
         <div className="relative mt-4">
           <h3 className="text-sm font-medium text-gray-900">{product.title}</h3>
           <p
-            className={`mt-1 text-xs text-gray-500 p-1 ${
+            className={`mt-1 text-xs text-gray-500 p-0.5 ${
               product.isAvailable ? "bg-green-300" : "bg-yellow-300"
             } max-w-max rounded-sm`}
           >
@@ -49,7 +49,7 @@ const ProductCard = (props: Props) => {
       <div className="mt-6">
         <button
           type="button"
-          className="relative flex bg-gray-100 border border-transparent rounded-md py-2 px-8 items-center justify-center text-sm font-medium text-gray-900 hover:bg-gray-200 w-full"
+          className="relative flex bg-purple-200 border border-transparent rounded-md py-2 px-8 items-center justify-center text-sm font-medium text-gray-900 hover:bg-purple-300 w-full"
           onClick={() => dispatch(addToCart(product))}
         >
           Add to cart<span className="sr-only">, {product.title}</span>

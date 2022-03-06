@@ -3,6 +3,8 @@ import {
   ADD_PRODUCT,
   AUTH_STATE_CHANGE,
   CLOSE_NOTIFICATION,
+  GET_PRODUCTS,
+  ORDER_PRODUCT,
   PERSIST_USER,
   REMOVE_FROM_CART,
   ROUTE_TO_DASHBOARD,
@@ -10,15 +12,21 @@ import {
   SIGN_OUT,
   SIGN_UP,
   TOGGLE_CART,
-} from "./../../../utils/constants/index";
-import { call, put } from "redux-saga/effects";
-import { ADD_TO_CART } from "../../../utils/constants";
+  ADD_TO_CART,
+  GET_PRODUCT,
+} from "./../../../utils/constants";
+import { call, put, select, SelectEffect } from "redux-saga/effects";
 import {
+  addProduct,
   addToCart,
+  clearCart,
   removeFromCart,
   setAdminUser,
+  setIsAuthenticating,
   setNotificationMassage,
   setNotify,
+  setPaymentSuccess,
+  setProduct,
   setRoute,
   signOut,
   toggleCart,
@@ -29,6 +37,11 @@ import {
   DocumentReference,
   DocumentSnapshot,
 } from "@firebase/firestore/dist/lite";
+import store, { RootState } from "../../store";
+
+function selectState<T>(selector: (s: RootState) => T): SelectEffect {
+  return select(selector);
+}
 
 function* appSaga({ type, payload }: { type: string; payload: any }) {
   switch (type) {
@@ -65,9 +78,11 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
         if (doc.exists()) {
           const user: IUser = doc.data() as IUser;
           yield put(setAdminUser(user));
+          yield put(setIsAuthenticating(false));
           yield put(setRoute(ROUTE_TO_DASHBOARD));
         }
       } catch (error) {
+        yield put(setIsAuthenticating(false));
         yield console.log(error);
       }
       break;
@@ -85,9 +100,10 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           isAdmin: false,
         };
         yield call(firebase.addUser, result.user.uid, user);
-
+        yield put(setIsAuthenticating(false));
         // implement user creation logic
       } catch (error) {
+        yield put(setIsAuthenticating(false));
         yield console.log(error);
       }
       break;
@@ -136,8 +152,6 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       try {
         const result: User | null = yield call(firebase.onAuthStateChanged);
 
-        yield console.log(result);
-
         if (result) {
           const doc: DocumentSnapshot = yield call(
             firebase.getUser,
@@ -147,8 +161,136 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           if (doc.exists()) {
             const user: IUser = doc.data() as IUser;
             yield put(setAdminUser(user));
-            // yield put(setRoute(ROUTE_TO_DASHBOARD));
           }
+          yield put(setIsAuthenticating(false));
+        }
+      } catch (error) {
+        yield put(setIsAuthenticating(false));
+        yield console.log(error);
+      }
+      break;
+    case GET_PRODUCTS:
+      try {
+        const selector = (
+          state: RootState
+        ): ReturnType<typeof store.getState> => state.app;
+        const state: ReturnType<typeof selector> = selectState(
+          selector
+        ) as unknown as ReturnType<typeof selector>;
+        const result: Record<string, any> = yield call(
+          firebase.getProducts,
+          payload
+        );
+
+        if (result?.product?.length !== 0) {
+          yield put(
+            addProduct({
+              products: result.products,
+              lastDocRef: result.lastDoc
+                ? result.lastDoc
+                : state.app.lastDocRef,
+              total: result.total ? result.total : state.app.total,
+            })
+          );
+        }
+      } catch (error) {
+        yield console.log(error);
+      }
+      break;
+    case ORDER_PRODUCT:
+      try {
+        const orderObj = {
+          billingAddress: {
+            address: payload.address,
+            city: payload.city,
+            country: payload.country,
+            postalCode: payload.postalCode,
+            state: payload.state,
+          },
+          email: payload.email,
+          phone: payload.phone,
+          payment: {
+            nameOnCard: payload.cardName,
+            isCardValid: payload.isCardValid ? payload.isCardValid : false,
+            cardType: payload.cardType ? payload.cardType : "",
+          },
+          products: payload.products.map(
+            (product: Record<string, any>) => product?.product.id
+          ),
+          files: payload.products.map(
+            (product: Record<string, any>) => product?.product?.productFile
+          ),
+          total: payload.totalPrice,
+        };
+
+        const result: DocumentReference = yield call(
+          firebase.orderProduct,
+          orderObj
+        );
+
+        if (result) {
+          const getFiles = async () => {
+            const result: unknown[] = [];
+            await Promise.all(
+              orderObj.files.map(async (file: string) => {
+                const fileObj: DocumentSnapshot = await firebase.getProductFile(
+                  file
+                );
+
+                return {
+                  path: fileObj?.data()?.fileUrl,
+                  filename: fileObj?.data()?.productName,
+                };
+              })
+            )
+              .then((res) => {
+                result.push(...res);
+              })
+              .catch((err) => console.log(err));
+
+            return result;
+          };
+
+          const files: unknown[] = yield call(getFiles);
+
+          yield console.log(files);
+
+          const mail = {
+            to: payload.email,
+            message: {
+              subject: `Order Confirmation #${result.id}`,
+              html: `<p>Thank you for your order! Your order #${result.id} has been processed successfully. Attached is a link download your file</p>`,
+              text: `Thank you for your order! Your order #${result.id} has been processed successfully. Attached is a link download your file`,
+              attachments: files,
+            },
+          };
+
+          const doc: DocumentReference = yield call(firebase.sendMail, mail);
+
+          if (doc.id) {
+            // clear cart
+            yield put(clearCart());
+            // set payment success modal
+            yield put(setPaymentSuccess(true));
+          }
+        }
+      } catch (error) {
+        yield console.log(error);
+      }
+      break;
+    case GET_PRODUCT:
+      try {
+        const result: DocumentSnapshot = yield call(
+          firebase.getProduct,
+          payload
+        );
+
+        if (result.exists()) {
+          const product: IProduct = {
+            id: result.id,
+            ...result.data(),
+          } as IProduct;
+          yield put(setProduct(product));
         }
       } catch (error) {
         yield console.log(error);

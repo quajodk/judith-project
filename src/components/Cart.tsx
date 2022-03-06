@@ -6,6 +6,7 @@ import CartItemProduct from "./CartItemProduct";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { Link } from "react-router-dom";
 import { toggleCart } from "../redux/actions/appActions";
+import { ICartItem } from "../utils/models";
 
 interface CartProps {
   open: boolean;
@@ -70,7 +71,7 @@ export default function Cart(props: CartProps) {
                       {cart && (
                         <div className="flow-root">
                           <ul className="-my-6 divide-y divide-gray-200">
-                            {cart?.products.map((item) => (
+                            {cart?.products.map((item: ICartItem) => (
                               <li key={item?.product?.id} className="py-6 flex">
                                 <CartItemProduct cartItem={item} />
                               </li>

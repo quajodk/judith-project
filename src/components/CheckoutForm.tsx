@@ -1,7 +1,15 @@
 import { XIcon } from "@heroicons/react/outline";
+import { useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { useAppSelector } from "../redux/hooks";
+import { orderProduct } from "../redux/actions/appActions";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { getCardType } from "../utils";
 import { IOrder, IProduct } from "../utils/models";
+import Visa from "../assets/icons/visa.png";
+import Mastercard from "../assets/icons/mastercard.png";
+import ConfirmPayment from "./PaymentModal";
+import { setPaymentSuccess } from "../redux/reducers/app/appReducer";
+import { RootState } from "../redux/store";
 
 interface ICheckoutItem {
   product: IProduct;
@@ -9,12 +17,61 @@ interface ICheckoutItem {
 }
 
 export default function CheckoutForm() {
-  const { cart, totalCartItems } = useAppSelector((state) => state.app);
+  const [isCardValid, setIsCardValid] = useState(false);
+  const [cardType, setCardType] = useState<string>();
+  const { cart, totalCartItems, openCart, paymentSuccess } = useAppSelector(
+    (state) => state.app
+  );
   const history = useHistory();
-  const { products } = cart as IOrder;
+  const { products, totalPrice } = cart as IOrder;
+  const [orderObj, setOrderObj] = useState<Record<string, any>>({});
+  const dispatch = useAppDispatch();
+
+  const expirationDateRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setOrderObj({ ...orderObj, [name]: value });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const today = new Date();
+    const today_mm = today.getMonth() + 1;
+    const today_yy = today.getFullYear() % 100;
+    // console.log(today_mm, today_yy);
+
+    var mm = parseFloat(orderObj?.expirationDate.substring(0, 2)); // get the mm portion of the expiryDate (first two characters)
+    var yy = parseFloat(orderObj?.expirationDate.substring(3));
+    // console.log(mm, yy);
+
+    if (!(yy > today_yy || (yy === today_yy && mm >= today_mm))) {
+      setIsCardValid(false);
+      return;
+    } else {
+      setIsCardValid(true);
+    }
+    const order = {
+      products,
+      totalPrice,
+      isCardValid,
+      cardType,
+      ...orderObj,
+    };
+    dispatch(orderProduct(order));
+  };
+
+  console.log(paymentSuccess, openCart);
 
   return (
     <div className="bg-white">
+      <ConfirmPayment
+        open={paymentSuccess}
+        setOpen={() => {
+          dispatch(setPaymentSuccess(!paymentSuccess));
+          history.goBack();
+        }}
+      />
       {/* Background color split screen for large screens */}
       <div
         className="hidden lg:block fixed top-0 left-0 w-1/2 h-full bg-white"
@@ -88,7 +145,7 @@ export default function CheckoutForm() {
             Payment and shipping details
           </h2>
 
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="max-w-2xl mx-auto px-4 lg:max-w-none lg:px-0">
               <div>
                 <h3
@@ -109,9 +166,10 @@ export default function CheckoutForm() {
                     <input
                       type="email"
                       id="email-address"
-                      name="email-address"
+                      name="email"
                       autoComplete="email"
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -128,16 +186,55 @@ export default function CheckoutForm() {
                       htmlFor="card-number"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Card number
+                      Name on card
                     </label>
                     <div className="mt-1">
                       <input
                         type="text"
-                        id="card-number"
-                        name="card-number"
-                        autoComplete="cc-number"
+                        id="card-name"
+                        name="cardName"
+                        autoComplete="cc-name"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
+                    </div>
+                  </div>
+
+                  <div className="col-span-3 sm:col-span-4">
+                    <label
+                      htmlFor="card-number"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Card number
+                    </label>
+                    <div className="mt-1 relative rounded-md ">
+                      <input
+                        type="text"
+                        id="card-number"
+                        name="cardNumber"
+                        autoComplete="cc-number"
+                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pl-4 pr-12 py-3"
+                        onChange={(e) => {
+                          e.target.value = e.target.value.replace(" ", "");
+                          handleChange(e);
+                          setCardType(getCardType(e.target.value));
+                        }}
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center">
+                        <div className="focus:ring-indigo-500 focus:border-indigo-500 pl-2 pr-3 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md">
+                          <img
+                            src={
+                              cardType?.toLowerCase() === "visa"
+                                ? Visa
+                                : cardType?.toLowerCase() === "mastercard"
+                                ? Mastercard
+                                : ""
+                            }
+                            className="h-6 w-6"
+                            alt=""
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -150,13 +247,23 @@ export default function CheckoutForm() {
                     </label>
                     <div className="mt-1">
                       <input
+                        ref={expirationDateRef}
                         type="text"
-                        name="expiration-date"
+                        name="expirationDate"
                         id="expiration-date"
+                        placeholder="01/21"
                         autoComplete="cc-exp"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
+                    {!isCardValid &&
+                      expirationDateRef.current?.value !== "" &&
+                      expirationDateRef.current?.value !== undefined && (
+                        <span className="text-xs text-red-400">
+                          Card has expired!
+                        </span>
+                      )}
                   </div>
 
                   <div>
@@ -168,11 +275,12 @@ export default function CheckoutForm() {
                     </label>
                     <div className="mt-1">
                       <input
-                        type="text"
+                        type="password"
                         name="cvc"
                         id="cvc"
                         autoComplete="csc"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -181,7 +289,7 @@ export default function CheckoutForm() {
 
               <div className="mt-10">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Shipping address
+                  Billing information
                 </h3>
 
                 <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
@@ -199,6 +307,26 @@ export default function CheckoutForm() {
                         name="address"
                         autoComplete="street-address"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <label
+                      htmlFor="country"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Country
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        id="country"
+                        name="country"
+                        autoComplete="country-name"
+                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -217,6 +345,7 @@ export default function CheckoutForm() {
                         name="city"
                         autoComplete="address-level2"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -231,10 +360,11 @@ export default function CheckoutForm() {
                     <div className="mt-1">
                       <input
                         type="text"
-                        id="region"
-                        name="region"
+                        id="state"
+                        name="state"
                         autoComplete="address-level1"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -250,35 +380,30 @@ export default function CheckoutForm() {
                       <input
                         type="text"
                         id="postal-code"
-                        name="postal-code"
+                        name="postalCode"
                         autoComplete="postal-code"
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="mt-10">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Billing information
-                </h3>
-
-                <div className="mt-6 flex items-center">
-                  <input
-                    id="same-as-shipping"
-                    name="same-as-shipping"
-                    type="checkbox"
-                    defaultChecked
-                    className="h-4 w-4 border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <div className="ml-2">
+                  <div className="sm:col-span-3">
                     <label
-                      htmlFor="same-as-shipping"
-                      className="text-sm font-medium text-gray-900"
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700"
                     >
-                      Same as shipping information
+                      Phone
                     </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        autoComplete="tel"
+                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

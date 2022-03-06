@@ -23,7 +23,7 @@ const HeroBg = (props: Props) => {
         {/* <div className="w-full bg-white h-32 md:h-40 lg:h-48" /> */}
       </div>
 
-      <div className="relative max-w-3xl mx-auto pb-96 px-4 text-center sm:pb-0 sm:px-6 lg:px-8">
+      <div className="relative max-w-3xl mx-auto pb-96 px-4 text-center sm:pb-0 sm:px-6 lg:px-8 h-48 lg:h-auto">
         {/* Background image and overlap */}
         <div
           aria-hidden="true"
