@@ -64,3 +64,20 @@ export const orderProduct = (order: Record<string, any>) => ({
   type: types.ORDER_PRODUCT,
   payload: order,
 });
+
+export const getCategories = () => ({
+  type: types.GET_CATEGORIES,
+});
+
+export const addCategory = (obj: Record<string, any>) => ({
+  type: types.ADD_CATEGORY,
+  payload: obj,
+});
+
+export const getOrders = () => ({
+  type: types.GET_ORDERS,
+});
+
+export const getAllProducts = () => ({
+  type: types.GET_ALL_PRODUCTS,
+});

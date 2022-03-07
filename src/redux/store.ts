@@ -28,9 +28,16 @@ const sagaMiddleware = createSagaMiddleware();
 const persistConfig = {
   key: "root",
   storage,
+  blacklist: [
+    "loadingProducts",
+    "loadingCategories",
+    "loadingOrders",
+    "addingProduct",
+    "addingCategory",
+  ],
 };
 
-const persistedReducers = persistReducer<any, any>(persistConfig, reducers);
+const persistedReducers = persistReducer(persistConfig, reducers);
 
 const store = configureStore({
   reducer: persistedReducers,

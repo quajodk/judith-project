@@ -1,8 +1,13 @@
 import {
+  ADD_CATEGORY,
   ADD_PRODUCT,
   ADD_TO_CART,
   AUTH_STATE_CHANGE,
   CLOSE_NOTIFICATION,
+  GET_ALL_PRODUCTS,
+  GET_CATEGORIES,
+  GET_ORDER,
+  GET_ORDERS,
   GET_PRODUCT,
   GET_PRODUCTS,
   ORDER_PRODUCT,
@@ -12,11 +17,11 @@ import {
   SIGN_OUT,
   TOGGLE_CART,
 } from "./../../utils/constants/index";
-import { takeLatest } from "redux-saga/effects";
+import { takeEvery } from "redux-saga/effects";
 import appSaga from "./app/appSaga";
 
 function* rootSaga() {
-  yield takeLatest(
+  yield takeEvery(
     [
       ADD_TO_CART,
       CLOSE_NOTIFICATION,
@@ -30,6 +35,11 @@ function* rootSaga() {
       GET_PRODUCTS,
       ORDER_PRODUCT,
       GET_PRODUCT,
+      GET_ALL_PRODUCTS,
+      ADD_CATEGORY,
+      GET_CATEGORIES,
+      GET_ORDERS,
+      GET_ORDER,
     ],
     appSaga
   );

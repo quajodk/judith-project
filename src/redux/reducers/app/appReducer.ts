@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { uuid } from "uuidv4";
-import { IOrder, IProduct, IUser } from "../../../utils/models";
+import {
+  ICategory,
+  ICheckoutOrder,
+  IOrder,
+  IProduct,
+  IUser,
+} from "../../../utils/models";
 
 interface AppState {
   product: IProduct | null;
@@ -11,11 +17,21 @@ interface AppState {
   notificationMessage: Record<string, any> | null;
   openCart: boolean;
   adminUser: IUser | null;
-  currentRoute: string | null;
+  currentRoute: string;
   isAuthenticating: boolean;
   lastDocRef: any | null;
   total: number;
   paymentSuccess: boolean;
+  categories: ICategory[];
+  totalOrders: number;
+  orders: ICheckoutOrder[];
+  loadingProducts: boolean;
+  loadingOrders: boolean;
+  loadingCategories: boolean;
+  addingCategory: boolean;
+  allProduct: IProduct[];
+  allProductTotal: number;
+  addingProduct: boolean;
 }
 
 const initialState: AppState = {
@@ -27,11 +43,21 @@ const initialState: AppState = {
   notificationMessage: null,
   openCart: false,
   adminUser: null,
-  currentRoute: null,
+  currentRoute: "",
   isAuthenticating: true,
   lastDocRef: null,
   total: 0,
   paymentSuccess: false,
+  categories: [],
+  totalOrders: 0,
+  orders: [],
+  loadingProducts: false,
+  loadingOrders: false,
+  loadingCategories: false,
+  addingCategory: false,
+  allProduct: [],
+  allProductTotal: 0,
+  addingProduct: false,
 };
 
 const appReducer = createSlice({
@@ -128,6 +154,36 @@ const appReducer = createSlice({
     setPaymentSuccess: (state, action: PayloadAction<boolean>) => {
       state.paymentSuccess = action.payload;
     },
+    setCategories: (state, action: PayloadAction<ICategory[]>) => {
+      state.categories = action.payload;
+    },
+    setTotalOrders: (state, action: PayloadAction<number>) => {
+      state.totalOrders = action.payload;
+    },
+    setOrders: (state, action: PayloadAction<ICheckoutOrder[]>) => {
+      state.orders = action.payload;
+    },
+    setLoadingProducts: (state, action: PayloadAction<boolean>) => {
+      state.loadingProducts = action.payload;
+    },
+    setLoadingOrders: (state, action: PayloadAction<boolean>) => {
+      state.loadingOrders = action.payload;
+    },
+    setLoadingCategories: (state, action: PayloadAction<boolean>) => {
+      state.loadingCategories = action.payload;
+    },
+    setAddingCategory: (state, action: PayloadAction<boolean>) => {
+      state.addingCategory = action.payload;
+    },
+    setAllProduct: (state, action: PayloadAction<IProduct[]>) => {
+      state.allProduct = action.payload;
+    },
+    setAllProductTotal: (state, action: PayloadAction<number>) => {
+      state.allProductTotal = action.payload;
+    },
+    setAddingProduct: (state, action: PayloadAction<boolean>) => {
+      state.addingProduct = action.payload;
+    },
   },
 });
 
@@ -145,6 +201,16 @@ export const {
   setProduct,
   clearCart,
   setPaymentSuccess,
+  setCategories,
+  setTotalOrders,
+  setOrders,
+  setLoadingProducts,
+  setLoadingOrders,
+  setLoadingCategories,
+  setAddingCategory,
+  setAllProduct,
+  setAllProductTotal,
+  setAddingProduct,
 } = appReducer.actions;
 
 export default appReducer.reducer;

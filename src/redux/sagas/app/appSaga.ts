@@ -1,4 +1,9 @@
-import { IProduct, IUser } from "./../../../utils/models/index";
+import {
+  ICategory,
+  ICheckoutOrder,
+  IProduct,
+  IUser,
+} from "./../../../utils/models/index";
 import {
   ADD_PRODUCT,
   AUTH_STATE_CHANGE,
@@ -14,6 +19,10 @@ import {
   TOGGLE_CART,
   ADD_TO_CART,
   GET_PRODUCT,
+  ADD_CATEGORY,
+  GET_CATEGORIES,
+  GET_ORDERS,
+  GET_ALL_PRODUCTS,
 } from "./../../../utils/constants";
 import { call, put, select, SelectEffect } from "redux-saga/effects";
 import {
@@ -21,13 +30,23 @@ import {
   addToCart,
   clearCart,
   removeFromCart,
+  setAddingCategory,
+  setAddingProduct,
   setAdminUser,
+  setAllProduct,
+  setAllProductTotal,
+  setCategories,
   setIsAuthenticating,
+  setLoadingCategories,
+  setLoadingOrders,
+  setLoadingProducts,
   setNotificationMassage,
   setNotify,
+  setOrders,
   setPaymentSuccess,
   setProduct,
   setRoute,
+  setTotalOrders,
   signOut,
   toggleCart,
 } from "../../reducers/app/appReducer";
@@ -38,6 +57,7 @@ import {
   DocumentSnapshot,
 } from "@firebase/firestore/dist/lite";
 import store, { RootState } from "../../store";
+import { getCategories } from "../../actions/appActions";
 
 function selectState<T>(selector: (s: RootState) => T): SelectEffect {
   return select(selector);
@@ -108,6 +128,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       }
       break;
     case ADD_PRODUCT:
+      yield put(setAddingProduct(true));
       try {
         const productFile = {
           productName: payload.title,
@@ -132,9 +153,18 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           productFile: productDoc.id,
         };
 
-        yield call(firebase.addProduct, payload.id, product);
+        const result: DocumentSnapshot = yield call(
+          firebase.addProduct,
+          payload.id,
+          product
+        );
+
+        if (result) {
+          yield put(setAddingProduct(false));
+        }
       } catch (error) {
         yield console.log(error);
+        yield put(setAddingProduct(false));
       }
       break;
     case PERSIST_USER:
@@ -173,7 +203,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       try {
         const selector = (
           state: RootState
-        ): ReturnType<typeof store.getState> => state.app;
+        ): ReturnType<typeof store.getState> => state;
         const state: ReturnType<typeof selector> = selectState(
           selector
         ) as unknown as ReturnType<typeof selector>;
@@ -253,8 +283,6 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
 
           const files: unknown[] = yield call(getFiles);
 
-          yield console.log(files);
-
           const mail = {
             to: payload.email,
             message: {
@@ -294,6 +322,67 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
         }
       } catch (error) {
         yield console.log(error);
+      }
+      break;
+    case ADD_CATEGORY:
+      yield put(setAddingCategory(true));
+      try {
+        const result: DocumentReference = yield call(
+          firebase.addCategory,
+          payload
+        );
+
+        if (result) {
+          yield put(getCategories());
+        }
+        yield put(setAddingCategory(false));
+      } catch (error) {
+        yield console.log(error);
+        yield put(setAddingCategory(true));
+      }
+      break;
+    case GET_CATEGORIES:
+      yield put(setLoadingCategories(true));
+      try {
+        const result: Record<string, any> = yield call(firebase.getCategories);
+
+        if (result?.length !== 0) {
+          yield put(setCategories(result as ICategory[]));
+        }
+        yield put(setLoadingCategories(false));
+      } catch (error) {
+        yield console.log(error);
+        yield put(setLoadingCategories(false));
+      }
+      break;
+    case GET_ORDERS:
+      yield put(setLoadingOrders(true));
+      try {
+        const result: Record<string, any> = yield call(firebase.getAllOrders);
+
+        if (result?.length !== 0) {
+          yield put(setOrders(result as ICheckoutOrder[]));
+          yield put(setTotalOrders(result?.length));
+        }
+        yield put(setLoadingOrders(false));
+      } catch (error) {
+        console.log(error);
+        yield put(setLoadingOrders(false));
+      }
+      break;
+    case GET_ALL_PRODUCTS:
+      yield put(setLoadingProducts(true));
+      try {
+        const result: Record<string, any> = yield call(firebase.getAllProducts);
+
+        if (result?.length !== 0) {
+          yield put(setAllProduct(result as IProduct[]));
+          yield put(setAllProductTotal(result?.length));
+        }
+        yield put(setLoadingProducts(false));
+      } catch (error) {
+        console.log(error);
+        yield put(setLoadingProducts(false));
       }
       break;
     default:

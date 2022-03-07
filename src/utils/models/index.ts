@@ -10,6 +10,7 @@ export interface IProduct {
   tags?: string[];
   currency?: string;
   productFile?: string;
+  category?: ICategory[];
 }
 
 export interface ICartItem {
@@ -29,4 +30,28 @@ export interface IUser {
   name: string;
   email: string;
   isAdmin: boolean;
+}
+
+export interface ICategory {
+  id: string;
+  name: string;
+}
+
+export interface ICheckoutOrder {
+  id: string;
+  data: string;
+  products: Record<string, any>[];
+  customer: ICustomer;
+  totalPrice: number;
+  currency: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  paymentDate: string;
+  orderStatus: string;
+}
+
+export interface ICustomer {
+  id: string;
+  name: string;
+  email: string;
 }

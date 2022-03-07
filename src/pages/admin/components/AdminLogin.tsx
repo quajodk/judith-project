@@ -11,16 +11,16 @@ export default function AdminLogin() {
   });
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { currentRoute } = useAppSelector((state) => state.app);
+  const { currentRoute, adminUser } = useAppSelector((state) => state.app);
 
   const init = useRef({ history });
 
   useEffect(() => {
     const { history } = init.current;
-    if (currentRoute === ROUTE_TO_DASHBOARD) {
+    if (currentRoute === ROUTE_TO_DASHBOARD && adminUser) {
       history.push("/admin/en/");
     }
-  }, [currentRoute]);
+  }, [adminUser, currentRoute]);
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -29,7 +29,6 @@ export default function AdminLogin() {
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    console.log(loginObj);
     dispatch(signIn(loginObj.email, loginObj.password));
   };
 

@@ -23,7 +23,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="min-h-full">
+      <div className="min-h-screen overflow-x-hidden">
         <Sidebar />
         {/* Main column */}
         <div className="lg:pl-64 flex flex-col">
@@ -47,7 +47,7 @@ export default function Dashboard() {
               />
             </Switch>
           </div>
-          <main className="flex-1">
+          <main className="overflow-x-hidden w-full h-full">
             <Switch>
               <Route
                 exact

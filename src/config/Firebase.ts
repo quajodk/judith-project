@@ -190,6 +190,80 @@ class Firebase {
     });
   };
 
+  public getCategories = () => {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const snapshot = await getDocs(
+            query(collection(this.db, "categories"))
+          );
+
+          const categories = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          resolve(categories);
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  };
+
+  public addCategory = (category: Record<string, any>) => {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const doc = await addDoc(collection(this.db, "categories"), category);
+          resolve(doc);
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  };
+
+  public getAllOrders = () => {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const snapshot = await getDocs(query(collection(this.db, "orders")));
+
+          const orders = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          resolve(orders);
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  };
+
+  public getAllProducts = () => {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const snapshot = await getDocs(
+            query(collection(this.db, "products"))
+          );
+
+          const products = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          resolve(products);
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  };
+
   /**
    *  ** Storage API **
    */

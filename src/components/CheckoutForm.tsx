@@ -9,7 +9,6 @@ import Visa from "../assets/icons/visa.png";
 import Mastercard from "../assets/icons/mastercard.png";
 import ConfirmPayment from "./PaymentModal";
 import { setPaymentSuccess } from "../redux/reducers/app/appReducer";
-import { RootState } from "../redux/store";
 
 interface ICheckoutItem {
   product: IProduct;
@@ -154,6 +153,25 @@ export default function CheckoutForm() {
                 >
                   Contact information
                 </h3>
+
+                <div className="mt-6">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Name
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      autoComplete="name"
+                      className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
 
                 <div className="mt-6">
                   <label

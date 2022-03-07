@@ -1,5 +1,5 @@
 import { CogIcon } from "@heroicons/react/outline";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef /*useState*/ } from "react";
 import { getProducts } from "../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { IProduct } from "../utils/models";

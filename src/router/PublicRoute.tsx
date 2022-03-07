@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import Banner from "../components/Banner";
+
 import CheckoutForm from "../components/CheckoutForm";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -29,7 +29,7 @@ const PublicRoute = (props: Props) => {
         <Route path="/checkout/:id" component={CheckoutForm} />
         <Route path="/" component={HomePage} />
       </Switch>
-      {/* <Banner /> */}
+
       <Footer />
     </div>
   );
