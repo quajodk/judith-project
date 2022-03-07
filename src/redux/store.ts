@@ -34,6 +34,7 @@ const persistConfig = {
     "loadingOrders",
     "addingProduct",
     "addingCategory",
+    "products",
   ],
 };
 
