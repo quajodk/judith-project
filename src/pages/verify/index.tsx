@@ -39,8 +39,6 @@ const VerifyPayment = (props: Props) => {
     return <ErrorPayment error={error} retryFn={verifyPaymentRetry} />;
   }
 
-  console.log(data);
-
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-50">
       {data && data?.data?.status === "success" ? (
