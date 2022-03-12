@@ -1,14 +1,12 @@
 import { XIcon } from "@heroicons/react/outline";
-import { useRef, useState } from "react";
+import { /*useRef*/ useState } from "react";
+import { AiOutlineLoading } from "react-icons/ai";
 import { useHistory } from "react-router-dom";
-import { orderProduct } from "../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { getCardType } from "../utils";
-import { IOrder, IProduct } from "../utils/models";
-import Visa from "../assets/icons/visa.png";
-import Mastercard from "../assets/icons/mastercard.png";
-import ConfirmPayment from "./PaymentModal";
-import { setPaymentSuccess } from "../redux/reducers/app/appReducer";
+import { setCustomer } from "../redux/reducers/app/appReducer";
+import paymentService from "../services/payment.service";
+import { IOrder, IPaymentParams, IProduct } from "../utils/models";
+import { uuid } from "uuidv4";
 
 interface ICheckoutItem {
   product: IProduct;
@@ -16,61 +14,58 @@ interface ICheckoutItem {
 }
 
 export default function CheckoutForm() {
-  const [isCardValid, setIsCardValid] = useState(false);
-  const [cardType, setCardType] = useState<string>();
-  const { cart, totalCartItems, openCart, paymentSuccess } = useAppSelector(
-    (state) => state.app
-  );
+  const { cart, totalCartItems } = useAppSelector((state) => state.app);
   const history = useHistory();
   const { products, totalPrice } = cart as IOrder;
   const [orderObj, setOrderObj] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(false);
+  const url = window.location.host;
+  const protocol = window.location.protocol;
   const dispatch = useAppDispatch();
 
-  const expirationDateRef = useRef<HTMLInputElement>(null);
+  // const expirationDateRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setOrderObj({ ...orderObj, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const today = new Date();
-    const today_mm = today.getMonth() + 1;
-    const today_yy = today.getFullYear() % 100;
-    // console.log(today_mm, today_yy);
-
-    var mm = parseFloat(orderObj?.expirationDate.substring(0, 2)); // get the mm portion of the expiryDate (first two characters)
-    var yy = parseFloat(orderObj?.expirationDate.substring(3));
-    // console.log(mm, yy);
-
-    if (!(yy > today_yy || (yy === today_yy && mm >= today_mm))) {
-      setIsCardValid(false);
-      return;
-    } else {
-      setIsCardValid(true);
-    }
-    const order = {
-      products,
-      totalPrice,
-      isCardValid,
-      cardType,
+    const callback_url = `${protocol}//${url}/checkout/${cart?.id}/verify`;
+    const payObj = {
       ...orderObj,
+      callback_url,
+      amount: totalPrice,
+      currency: "GHS",
+      reference: (cart?.id as string) + Date.now(),
+      channel: ["card", "mobile_money"],
     };
-    dispatch(orderProduct(order));
-  };
 
-  console.log(paymentSuccess, openCart);
+    dispatch(
+      setCustomer({
+        email: orderObj.email,
+        name: `${orderObj.first_name} ${orderObj.last_name}`,
+        id: uuid(),
+      })
+    );
+
+    setLoading(true);
+    try {
+      const result = await paymentService.initializePayment(
+        payObj as IPaymentParams
+      );
+      if (result.status) {
+        window.location.href = result.data.authorization_url;
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="bg-white">
-      <ConfirmPayment
-        open={paymentSuccess}
-        setOpen={() => {
-          dispatch(setPaymentSuccess(!paymentSuccess));
-          history.goBack();
-        }}
-      />
       {/* Background color split screen for large screens */}
       <div
         className="hidden lg:block fixed top-0 left-0 w-1/2 h-full bg-white"
@@ -103,7 +98,7 @@ export default function CheckoutForm() {
             <dl>
               <dt className="text-sm font-medium">Amount due</dt>
               <dd className="mt-1 text-3xl font-extrabold text-white">
-                ${cart?.totalPrice ?? 0}
+                GHS {cart?.totalPrice ?? 0}
               </dd>
             </dl>
 
@@ -125,12 +120,12 @@ export default function CheckoutForm() {
 
               <div className="flex items-center justify-between">
                 <dt>Subtotal</dt>
-                <dd>${cart?.totalPrice ?? 0}</dd>
+                <dd>GHS {cart?.totalPrice ?? 0}</dd>
               </div>
 
               <div className="flex items-center justify-between border-t border-white border-opacity-10 text-white pt-6">
                 <dt className="text-base">Total</dt>
-                <dd className="text-base">${cart?.totalPrice ?? 0}</dd>
+                <dd className="text-base">GHS {cart?.totalPrice ?? 0}</dd>
               </div>
             </dl>
           </div>
@@ -156,17 +151,36 @@ export default function CheckoutForm() {
 
                 <div className="mt-6">
                   <label
-                    htmlFor="name"
+                    htmlFor="first_name"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Name
+                    First name
                   </label>
                   <div className="mt-1">
                     <input
                       type="text"
-                      id="name"
-                      name="name"
-                      autoComplete="name"
+                      id="first_name"
+                      name="first_name"
+                      autoComplete="first_name"
+                      className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <label
+                    htmlFor="last_name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Last name
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      id="last_name"
+                      name="last_name"
+                      autoComplete="last_name"
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       onChange={handleChange}
                     />
@@ -193,245 +207,20 @@ export default function CheckoutForm() {
                 </div>
               </div>
 
-              <div className="mt-10">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Payment details
-                </h3>
-
-                <div className="mt-6 grid grid-cols-3 sm:grid-cols-4 gap-y-6 gap-x-4">
-                  <div className="col-span-3 sm:col-span-4">
-                    <label
-                      htmlFor="card-number"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Name on card
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="card-name"
-                        name="cardName"
-                        autoComplete="cc-name"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-span-3 sm:col-span-4">
-                    <label
-                      htmlFor="card-number"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Card number
-                    </label>
-                    <div className="mt-1 relative rounded-md ">
-                      <input
-                        type="text"
-                        id="card-number"
-                        name="cardNumber"
-                        autoComplete="cc-number"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pl-4 pr-12 py-3"
-                        onChange={(e) => {
-                          e.target.value = e.target.value.replace(" ", "");
-                          handleChange(e);
-                          setCardType(getCardType(e.target.value));
-                        }}
-                      />
-                      <div className="absolute inset-y-0 right-0 flex items-center">
-                        <div className="focus:ring-indigo-500 focus:border-indigo-500 pl-2 pr-3 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md">
-                          <img
-                            src={
-                              cardType?.toLowerCase() === "visa"
-                                ? Visa
-                                : cardType?.toLowerCase() === "mastercard"
-                                ? Mastercard
-                                : ""
-                            }
-                            className="h-6 w-6"
-                            alt=""
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 sm:col-span-3">
-                    <label
-                      htmlFor="expiration-date"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Expiration date (MM/YY)
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        ref={expirationDateRef}
-                        type="text"
-                        name="expirationDate"
-                        id="expiration-date"
-                        placeholder="01/21"
-                        autoComplete="cc-exp"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                    {!isCardValid &&
-                      expirationDateRef.current?.value !== "" &&
-                      expirationDateRef.current?.value !== undefined && (
-                        <span className="text-xs text-red-400">
-                          Card has expired!
-                        </span>
-                      )}
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="cvc"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      CVC
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="password"
-                        name="cvc"
-                        id="cvc"
-                        autoComplete="csc"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-10">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Billing information
-                </h3>
-
-                <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="address"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Address
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        autoComplete="street-address"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="country"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Country
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="country"
-                        name="country"
-                        autoComplete="country-name"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      City
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        autoComplete="address-level2"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="region"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      State / Province
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="state"
-                        name="state"
-                        autoComplete="address-level1"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="postal-code"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Postal code
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="postal-code"
-                        name="postalCode"
-                        autoComplete="postal-code"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="address"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Phone
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="phone"
-                        name="phone"
-                        autoComplete="tel"
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-10 flex justify-end pt-6 border-t border-gray-200">
+              <div className="mt-10 pt-6">
                 <button
                   type="submit"
-                  className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+                  className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500 flex items-center justify-center w-full"
+                  disabled={loading}
                 >
-                  Pay now
+                  {loading ? (
+                    <>
+                      <AiOutlineLoading className="h-4 w-4 animate-spin text-white mr-2" />{" "}
+                      Processing ..
+                    </>
+                  ) : (
+                    "Pay now"
+                  )}
                 </button>
               </div>
             </div>
@@ -457,7 +246,7 @@ const CheckoutItem = (props: ICheckoutItem) => {
         <p>{qty ?? 1}</p>
       </div>
       <p className="flex-none text-base font-medium text-white">
-        ${product.price}
+        GHS {product.price}
       </p>
     </li>
   );

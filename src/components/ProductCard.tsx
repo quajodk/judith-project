@@ -41,8 +41,9 @@ const ProductCard = (props: Props) => {
             aria-hidden="true"
             className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black opacity-50"
           />
-          <p className="relative text-lg font-semibold text-white">
-            ${product.price}
+          <p className="relative text-lg font-semibold text-white space-x-1">
+            {product?.currency}
+            {product.price}
           </p>
         </div>
       </div>

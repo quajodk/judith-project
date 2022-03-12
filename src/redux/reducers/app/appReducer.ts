@@ -3,6 +3,7 @@ import { uuid } from "uuidv4";
 import {
   ICategory,
   ICheckoutOrder,
+  ICustomer,
   IOrder,
   IProduct,
   IUser,
@@ -32,6 +33,7 @@ interface AppState {
   allProduct: IProduct[];
   allProductTotal: number;
   addingProduct: boolean;
+  customer: ICustomer | null;
 }
 
 const initialState: AppState = {
@@ -58,6 +60,7 @@ const initialState: AppState = {
   allProduct: [],
   allProductTotal: 0,
   addingProduct: false,
+  customer: null
 };
 
 const appReducer = createSlice({
@@ -184,6 +187,9 @@ const appReducer = createSlice({
     setAddingProduct: (state, action: PayloadAction<boolean>) => {
       state.addingProduct = action.payload;
     },
+    setCustomer: (state, action: PayloadAction<ICustomer | null>) => {
+      state.customer = action.payload;
+    }
   },
 });
 
@@ -211,6 +217,7 @@ export const {
   setAllProduct,
   setAllProductTotal,
   setAddingProduct,
+  setCustomer
 } = appReducer.actions;
 
 export default appReducer.reducer;

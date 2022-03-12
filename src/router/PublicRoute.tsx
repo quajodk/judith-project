@@ -9,6 +9,7 @@ import ProductPage from "../pages/product";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import Notification from "../components/Notification";
 import { closeNotification } from "../redux/actions/appActions";
+import VerifyPayment from "../pages/verify";
 
 interface Props {}
 
@@ -26,7 +27,8 @@ const PublicRoute = (props: Props) => {
       />
       <Switch>
         <Route path="/product/:id" component={ProductPage} />
-        <Route path="/checkout/:id" component={CheckoutForm} />
+        <Route exact path="/checkout/:id" component={CheckoutForm} />
+        <Route path="/checkout/:id/verify" component={VerifyPayment} />
         <Route path="/" component={HomePage} />
       </Switch>
 

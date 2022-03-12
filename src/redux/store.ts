@@ -35,6 +35,8 @@ const persistConfig = {
     "addingProduct",
     "addingCategory",
     "products",
+    "lastDocRef",
+    "openCart",
   ],
 };
 
