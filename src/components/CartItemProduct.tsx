@@ -33,7 +33,7 @@ const CartItemProduct = (props: Props) => {
                 {product.title}
               </Link>
             </h3>
-            <p className="ml-4">{product.price}</p>
+            <p className="ml-4">GHS {product.price}</p>
           </div>
           <p className="mt-1 text-sm text-gray-500">{product.color}</p>
         </div>

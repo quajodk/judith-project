@@ -39,10 +39,11 @@ export interface ICategory {
 
 export interface ICheckoutOrder {
   id: string;
-  data: string;
+  date: string;
   products: Record<string, any>[];
+  files: string[];
   customer: ICustomer;
-  totalPrice: number;
+  totalAmount: number;
   currency: string;
   paymentMethod: string;
   paymentStatus: string;
@@ -54,4 +55,15 @@ export interface ICustomer {
   id: string;
   name: string;
   email: string;
+}
+
+export interface IPaymentParams {
+  amount: number;
+  currency: string;
+  email: string;
+  reference: string;
+  channel?: string[];
+  first_name?: string;
+  last_name?: string;
+  callback_url?: string;
 }

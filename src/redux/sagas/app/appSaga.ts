@@ -1,6 +1,7 @@
 import {
   ICategory,
   ICheckoutOrder,
+  ICustomer,
   IProduct,
   IUser,
 } from "./../../../utils/models/index";
@@ -62,6 +63,8 @@ import { getCategories } from "../../actions/appActions";
 function selectState<T>(selector: (s: RootState) => T): SelectEffect {
   return select(selector);
 }
+
+const selector = (state: RootState): ReturnType<typeof store.getState> => state;
 
 function* appSaga({ type, payload }: { type: string; payload: any }) {
   switch (type) {
@@ -201,10 +204,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       break;
     case GET_PRODUCTS:
       try {
-        const selector = (
-          state: RootState
-        ): ReturnType<typeof store.getState> => state;
-        const state: ReturnType<typeof selector> = selectState(
+        const state: ReturnType<typeof selector> = yield selectState(
           selector
         ) as unknown as ReturnType<typeof selector>;
         const result: Record<string, any> = yield call(
@@ -228,29 +228,28 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       }
       break;
     case ORDER_PRODUCT:
+      const state: ReturnType<typeof selector> = yield selectState(
+        selector
+      ) as unknown as ReturnType<typeof selector>;
+
+      const app = state.app;
       try {
-        const orderObj = {
-          billingAddress: {
-            address: payload.address,
-            city: payload.city,
-            country: payload.country,
-            postalCode: payload.postalCode,
-            state: payload.state,
-          },
-          email: payload.email,
-          phone: payload.phone,
-          payment: {
-            nameOnCard: payload.cardName,
-            isCardValid: payload.isCardValid ? payload.isCardValid : false,
-            cardType: payload.cardType ? payload.cardType : "",
-          },
-          products: payload.products.map(
-            (product: Record<string, any>) => product?.product.id
-          ),
-          files: payload.products.map(
+        const orderObj: ICheckoutOrder = {
+          id: app.cart?.id as string,
+          date: payload.created_at,
+          customer: app.customer as ICustomer,
+          paymentDate: payload.transaction_date,
+          currency: payload.currency,
+          orderStatus: "completed",
+          paymentMethod: payload.channel,
+          paymentStatus: payload.status,
+          products: app.cart?.products.map(
+            (product: Record<string, any>) => product
+          ) as Record<string, any>[],
+          files: app.cart?.products.map(
             (product: Record<string, any>) => product?.product?.productFile
-          ),
-          total: payload.totalPrice,
+          ) as string[],
+          totalAmount: app.cart?.totalPrice as number,
         };
 
         const result: DocumentReference = yield call(
@@ -284,11 +283,24 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           const files: unknown[] = yield call(getFiles);
 
           const mail = {
-            to: payload.email,
+            to: app.customer?.email,
             message: {
               subject: `Order Confirmation #${result.id}`,
-              html: `<p>Thank you for your order! Your order #${result.id} has been processed successfully. Attached is a link download your file</p>`,
-              text: `Thank you for your order! Your order #${result.id} has been processed successfully. Attached is a link download your file`,
+              html: `<p>Hello ${app.customer?.name.split(" ")[0]}</p>
+              <p>Thank you for your order! Your order #${
+                result.id
+              } has been processed successfully. Attached is a link download your file.</p>
+              <p>Download Link:\n${files
+                .map((file: any) => file.path)
+                .join("\n")}</p><br/>
+                <p><b>Thank you! 🎉</b></p>`,
+              text: `Hello ${
+                app.customer?.name.split(" ")[0]
+              }\nThank you for your order! Your order #${
+                result.id
+              } has been processed successfully. Attached is a link download your file. \n\nDownload Link:\n${files
+                .map((file: any) => file.path)
+                .join("\n")}\n\nThank you! 🎉`,
               attachments: files,
             },
           };

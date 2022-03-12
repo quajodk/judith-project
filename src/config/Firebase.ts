@@ -145,6 +145,7 @@ class Firebase {
     return new Promise((resolve, reject) => {
       (async () => {
         if (lastDocRef) {
+          console.log(lastDocRef, "lastDocRef");
           try {
             const docQuery = query(
               collection(this.db, "products"),
@@ -158,6 +159,7 @@ class Firebase {
               id: doc.id,
               ...doc.data(),
             }));
+
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
             resolve({ products, lastDoc });
@@ -179,6 +181,7 @@ class Firebase {
               id: doc.id,
               ...doc.data(),
             }));
+
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
             resolve({ products, lastDoc, total });
