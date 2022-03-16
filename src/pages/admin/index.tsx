@@ -10,6 +10,7 @@ import { navigation } from "../../utils";
 import AddProduct from "./components/AddProduct";
 import { useAppDispatch } from "../../redux/hooks";
 import { persistUser } from "../../redux/actions/appActions";
+import { setDone } from "../../redux/reducers/app/appReducer";
 
 export default function Dashboard() {
   const { path } = useRouteMatch();
@@ -19,6 +20,7 @@ export default function Dashboard() {
   useEffect(() => {
     const { dispatch } = init.current;
     dispatch(persistUser());
+    dispatch(setDone(false));
   }, []);
 
   return (

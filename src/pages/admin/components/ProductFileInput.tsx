@@ -7,6 +7,7 @@ interface Props {
   setProductFileUrl: (url: string) => void;
   setProductName: (name: string) => void;
   id: string;
+  setExt?: (ext: string) => void;
 }
 
 const ProductFileInput = ({
@@ -14,6 +15,7 @@ const ProductFileInput = ({
   productName,
   setProductFileUrl,
   setProductName,
+  setExt,
 }: Props) => {
   const [file, setFile] = useState<File>();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -35,6 +37,7 @@ const ProductFileInput = ({
   ) => {
     setFile(e.target.files[0]);
     await uploadFiles(folder, e.target.files[0]);
+    setExt && setExt(e.target.files[0]?.name?.split(".")[1]);
   };
 
   return (

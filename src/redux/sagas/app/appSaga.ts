@@ -37,6 +37,8 @@ import {
   setAllProduct,
   setAllProductTotal,
   setCategories,
+  setDone,
+  setFetchingProduct,
   setIsAuthenticating,
   setLoadingCategories,
   setLoadingOrders,
@@ -87,6 +89,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       yield put(removeFromCart(payload));
       break;
     case SIGN_IN:
+      yield put(setIsAuthenticating(true));
       try {
         const result: UserCredential = yield call(
           firebase.signIn,
@@ -104,6 +107,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           yield put(setIsAuthenticating(false));
           yield put(setRoute(ROUTE_TO_DASHBOARD));
         }
+        yield put(setIsAuthenticating(false));
       } catch (error) {
         yield put(setIsAuthenticating(false));
         yield console.log(error);
@@ -136,6 +140,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
         const productFile = {
           productName: payload.title,
           fileUrl: payload.productFile,
+          ext: payload.fileType,
         };
 
         const productDoc: DocumentReference = yield call(
@@ -154,20 +159,17 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           tags: payload.tags,
           currency: payload.currency,
           productFile: productDoc.id,
+          createdAt: payload.createdAt,
         };
+        yield call(firebase.addProduct, payload.id, product);
 
-        const result: DocumentSnapshot = yield call(
-          firebase.addProduct,
-          payload.id,
-          product
-        );
+        yield put(setAddingProduct(false));
 
-        if (result) {
-          yield put(setAddingProduct(false));
-        }
+        yield put(setDone(true));
       } catch (error) {
         yield console.log(error);
         yield put(setAddingProduct(false));
+        yield put(setDone(false));
       }
       break;
     case PERSIST_USER:
@@ -203,10 +205,12 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       }
       break;
     case GET_PRODUCTS:
+      yield put(setFetchingProduct(true));
       try {
         const state: ReturnType<typeof selector> = yield selectState(
           selector
         ) as unknown as ReturnType<typeof selector>;
+
         const result: Record<string, any> = yield call(
           firebase.getProducts,
           payload
@@ -222,6 +226,10 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
               total: result.total ? result.total : state.app.total,
             })
           );
+          yield put(setFetchingProduct(false));
+        } else {
+          yield put(setFetchingProduct(false));
+          yield put(addProduct({ products: [], lastDocRef: null, total: 0 }));
         }
       } catch (error) {
         yield console.log(error);
@@ -268,7 +276,9 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
 
                 return {
                   path: fileObj?.data()?.fileUrl,
-                  filename: fileObj?.data()?.productName,
+                  filename: `${fileObj?.data()?.productName}.${
+                    fileObj?.data()?.ext
+                  }`,
                 };
               })
             )

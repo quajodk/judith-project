@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AiOutlineLoading } from "react-icons/ai";
 import { useHistory } from "react-router";
 import { signIn } from "../../../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
@@ -11,7 +12,9 @@ export default function AdminLogin() {
   });
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { currentRoute, adminUser } = useAppSelector((state) => state.app);
+  const { currentRoute, adminUser, isAuthenticating } = useAppSelector(
+    (state) => state.app
+  );
 
   const init = useRef({ history });
 
@@ -74,8 +77,13 @@ export default function AdminLogin() {
             <button
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isAuthenticating}
             >
-              Sign in
+              {isAuthenticating ? (
+                <AiOutlineLoading className="h-5 w-5 text-white font-semibold" />
+              ) : (
+                "Sign in"
+              )}
             </button>
           </div>
         </form>

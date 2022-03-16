@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Toggle from "./ToggleComponent";
 import CreatableSelect from "react-select/creatable";
 import Select from "react-select";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { uuid } from "uuidv4";
 import ProductFileInput from "./ProductFileInput";
 import ProductMediaInput from "./ProductMediaInput";
@@ -12,9 +12,11 @@ import Modal from "../../../components/Modal";
 import AddCategory from "./AddCategory";
 import _ from "lodash";
 
+
 interface Props {}
 
 export default function AddProduct(prop: Props) {
+
   const [enabled, setEnabled] = useState(false);
   const [currency, setCurrency] = useState<string>();
   const [tags, setTags] = useState<Record<string, any>[]>([]);
@@ -25,8 +27,12 @@ export default function AddProduct(prop: Props) {
   const [productFileUrl, setProductFileUrl] = useState<string>();
   const [productMediaUrl, setProductMediaUrl] = useState<string>();
   const [openModal, setOpenModal] = useState(false);
+  const [ext, setExt] = useState("");
   const dispatch = useAppDispatch();
-  const { categories,  } = useAppSelector((state) => state.app);
+  const { categories, addingProduct, done } = useAppSelector(
+    (state) => state.app
+  );
+  const history = useHistory();
 
   const categoryOptions = useMemo(() => {
     return categories
@@ -38,12 +44,15 @@ export default function AddProduct(prop: Props) {
   }, [categories]);
 
   id = useMemo(() => (id ? id : uuid()), [id]);
-  const init = useRef({ dispatch });
+  const init = useRef({ dispatch, history });
 
   useEffect(() => {
-    const { dispatch } = init.current;
+    const { dispatch, history } = init.current;
     dispatch(getCategories());
-  }, []);
+    if (done) {
+      history.push("/admin/en/products");
+    }
+  }, [done]);
 
   const handleChange = (e: any) => {
     setTags(e.map((e: any) => ({ value: e.value, label: e.label })));
@@ -71,6 +80,8 @@ export default function AddProduct(prop: Props) {
       isAvailable: enabled,
       imageAlt: productObj.title.toLowerCase().replace(/\s/g, "-"),
       categories: category,
+      fileType: ext,
+      createdAt: new Date(),
     };
 
     dispatch(addProduct(product));
@@ -173,6 +184,7 @@ export default function AddProduct(prop: Props) {
                   setProductName={setProductName}
                   productName={productName}
                   setProductFileUrl={setProductFileUrl}
+                  setExt={setExt}
                 />
               </div>
 
@@ -250,14 +262,16 @@ export default function AddProduct(prop: Props) {
             <button
               type="button"
               className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={() => history.goBack()}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={addingProduct}
             >
-              Save
+              {addingProduct ? "Saving ..." : "Save"}
             </button>
           </div>
         </div>

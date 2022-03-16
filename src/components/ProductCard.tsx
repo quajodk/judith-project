@@ -26,15 +26,15 @@ const ProductCard = (props: Props) => {
             className="w-full h-full object-center object-cover"
           />
         </div>
-        <div className="relative mt-4">
+        <div className="relative mt-4 flex flex-col">
           <h3 className="text-sm font-medium text-gray-900">{product.title}</h3>
-          <p
+          <span
             className={`mt-1 text-xs text-gray-500 p-0.5 ${
               product.isAvailable ? "bg-green-300" : "bg-yellow-300"
             } max-w-max rounded-sm`}
           >
             {product.isAvailable ? "Available" : "Out of stock"}
-          </p>
+          </span>
         </div>
         <div className="absolute top-0 inset-x-0 h-72 rounded-lg p-4 flex items-end justify-end overflow-hidden">
           <div
