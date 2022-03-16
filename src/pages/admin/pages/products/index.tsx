@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { getAllProducts } from "../../../../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../../../../redux/hooks";
+import { setDone } from "../../../../redux/reducers/app/appReducer";
 import { productColumns } from "../../components/options";
 import Table from "../../components/Table";
 
@@ -15,6 +16,7 @@ const AdminProductsPage = (props: Props) => {
   useEffect(() => {
     const { dispatch } = init.current;
     dispatch(getAllProducts());
+    dispatch(setDone(false));
   }, []);
 
   return (

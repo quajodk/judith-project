@@ -7,10 +7,13 @@ import ProductCard from "./ProductCard";
 
 export default function ProductList() {
   const dispatch = useAppDispatch();
-  const { products, lastDocRef, total } = useAppSelector((state) => state.app);
+  const { products, lastDocRef, total, fetchingProduct } = useAppSelector(
+    (state) => state.app
+  );
 
   const loadMore = () => {
-    if (lastDocRef) {
+    console.log("this get called");
+    if (lastDocRef && products.length !== total) {
       dispatch(getProducts(lastDocRef));
     }
   };
@@ -29,13 +32,28 @@ export default function ProductList() {
     }
   }, [total]);
 
-  if (products.length === 0) {
+  console.log(total);
+
+  if (products.length === 0 && fetchingProduct) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="text-center">
           <div className="flex flex-col justify-center items-center">
             <CogIcon className="h-6 w-6 animate-spin text-green-500" />
             Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (products.length === 0 && !fetchingProduct) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+        <div className="text-center">
+          <div className="flex flex-col justify-center items-center">
+            <span></span>
+            No products found
           </div>
         </div>
       </div>

@@ -145,11 +145,10 @@ class Firebase {
     return new Promise((resolve, reject) => {
       (async () => {
         if (lastDocRef) {
-          console.log(lastDocRef, "lastDocRef");
           try {
             const docQuery = query(
               collection(this.db, "products"),
-              orderBy("id"),
+              orderBy("createdAt", "desc"),
               startAfter(lastDocRef),
               limit(10)
             );
@@ -158,6 +157,10 @@ class Firebase {
             const products = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
+              createdAt: doc
+                .data()
+                .createdAt.toDate()
+                .toLocaleDateString("en-GB"),
             }));
 
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
@@ -169,10 +172,11 @@ class Firebase {
         } else {
           try {
             const totalQuery = query(collection(this.db, "products"));
-            const total = await getDocs(totalQuery);
+            const snap = await getDocs(totalQuery);
+            const total = snap.size;
             const docQuery = query(
               collection(this.db, "products"),
-              orderBy("id"),
+              orderBy("createdAt", "desc"),
               limit(10)
             );
 
@@ -180,6 +184,10 @@ class Firebase {
             const products = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
+              createdAt: doc
+                .data()
+                .createdAt.toDate()
+                .toLocaleDateString("en-GB"),
             }));
 
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
@@ -257,6 +265,10 @@ class Firebase {
           const products = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
+            createdAt: doc
+              .data()
+              .createdAt.toDate()
+              .toLocaleDateString("en-GB"),
           }));
 
           resolve(products);

@@ -34,6 +34,8 @@ interface AppState {
   allProductTotal: number;
   addingProduct: boolean;
   customer: ICustomer | null;
+  fetchingProduct: boolean;
+  done: boolean;
 }
 
 const initialState: AppState = {
@@ -60,7 +62,9 @@ const initialState: AppState = {
   allProduct: [],
   allProductTotal: 0,
   addingProduct: false,
-  customer: null
+  customer: null,
+  fetchingProduct: false,
+  done: false,
 };
 
 const appReducer = createSlice({
@@ -189,7 +193,13 @@ const appReducer = createSlice({
     },
     setCustomer: (state, action: PayloadAction<ICustomer | null>) => {
       state.customer = action.payload;
-    }
+    },
+    setFetchingProduct: (state, action: PayloadAction<boolean>) => {
+      state.fetchingProduct = action.payload;
+    },
+    setDone: (state, action: PayloadAction<boolean>) => {
+      state.done = action.payload;
+    },
   },
 });
 
@@ -217,7 +227,9 @@ export const {
   setAllProduct,
   setAllProductTotal,
   setAddingProduct,
-  setCustomer
+  setCustomer,
+  setFetchingProduct,
+  setDone,
 } = appReducer.actions;
 
 export default appReducer.reducer;

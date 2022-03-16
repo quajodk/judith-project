@@ -11,6 +11,7 @@ export interface IProduct {
   currency?: string;
   productFile?: string;
   category?: ICategory[];
+  createdAt?: string;
 }
 
 export interface ICartItem {
