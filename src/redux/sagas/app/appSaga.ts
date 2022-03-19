@@ -311,7 +311,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
               } has been processed successfully. Attached is a link download your file. \n\nDownload Link:\n${files
                 .map((file: any) => file.path)
                 .join("\n")}\n\nThank you! 🎉`,
-              attachments: files,
+              // attachments: files,
             },
           };
 
