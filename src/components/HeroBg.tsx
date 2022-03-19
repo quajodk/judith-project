@@ -45,6 +45,9 @@ const HeroBg = (props: Props) => {
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
             Omega Vendor List
           </h1>
+          <p className="text-xl text-white mt-4">
+            Start your business with the right vendors
+          </p>
         </div>
       </div>
     </div>
