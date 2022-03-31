@@ -1,34 +1,61 @@
+import _ from "lodash";
+import OrdersActionMenu from "./OrdersActionMenu";
 import ActionMenu from "./ActionMenu";
 
 export const columns = [
   {
     Header: "Order #",
-    accessor: "order_number",
+    accessor: "id",
   },
   {
     Header: "Product",
-    accessor: "",
+    accessor: "product.title",
+    Cell: ({ row }) => <OrderProductRender row={row} />,
   },
   {
     Header: "Quantity",
-    accessor: "",
+    accessor: "products.quantity",
+    Cell: ({ row }) => <OrderQtyRender row={row} />,
   },
   {
     Header: "Customer",
-    accessor: "",
+    accessor: "customer.name",
+    Cell: ({ row }) => <CustomerRender row={row} />,
   },
   {
     Header: "Payment Status",
-    accessor: "",
+    accessor: "paymentStatus",
+    Cell: ({ value }) => {
+      return (
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-md ${
+            value === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
+          }`}
+        >
+          {_.startCase(_.toLower(value))}
+        </span>
+      );
+    },
   },
   {
     Header: "Payment Method",
-    accessor: "",
+    accessor: "paymentMethod",
+    Cell: ({ value }) => {
+      return (
+        <span
+          className={`px-2 inline-flex text-sm leading-5 font-semibold rounded-md text-gray-700`}
+        >
+          {_.startCase(_.toLower(value))}
+        </span>
+      );
+    },
   },
   {
     Header: "Actions",
     accessor: "",
-    Cell: ({ row }) => <ActionMenu order={row?.original} />,
+    Cell: ({ row }) => <OrdersActionMenu order={row?.original} />,
   },
 ];
 
@@ -81,6 +108,37 @@ const ProductRender = ({ row }) => {
         />
       </div>
       <span className="text-sm font-medium">{row.original.title}</span>
+    </div>
+  );
+};
+
+const CustomerRender = ({ row }) => {
+  return (
+    <div className="flex flex-col">
+      <span className="font-medium text-sm">{row.original.customer?.name}</span>
+      <span className="text-xs">{row.original.customer?.email}</span>
+    </div>
+  );
+};
+
+const OrderProductRender = ({ row }) => {
+  return (
+    <div className="flex flex-col">
+      {row.original.products.map((product, index) => (
+        <span className="font-medium text-sm" key={index}>
+          {product?.product.title}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const OrderQtyRender = ({ row }) => {
+  return (
+    <div className="flex flex-col">
+      {row.original.products.reduce((acc, product) => {
+        return acc + product.quantity;
+      }, 0)}
     </div>
   );
 };

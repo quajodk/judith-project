@@ -160,6 +160,7 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
           currency: payload.currency,
           productFile: productDoc.id,
           createdAt: payload.createdAt,
+          category: payload.categories,
         };
         yield call(firebase.addProduct, payload.id, product);
 

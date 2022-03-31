@@ -7,11 +7,11 @@ export interface IProduct {
   description: string;
   isAvailable: boolean;
   color?: string; // optional, changes it promotion tag
-  tags?: string[];
+  tags?: any[];
   currency?: string;
   productFile?: string;
   category?: ICategory[];
-  createdAt?: string;
+  createdAt?: any;
 }
 
 export interface ICartItem {

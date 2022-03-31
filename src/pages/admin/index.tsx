@@ -11,6 +11,7 @@ import AddProduct from "./components/AddProduct";
 import { useAppDispatch } from "../../redux/hooks";
 import { persistUser } from "../../redux/actions/appActions";
 import { setDone } from "../../redux/reducers/app/appReducer";
+import EditProduct from "./components/EditProduct";
 
 export default function Dashboard() {
   const { path } = useRouteMatch();
@@ -41,12 +42,6 @@ export default function Dashboard() {
                   render={(props) => <PageTitle name={item.name} {...props} />}
                 />
               ))}
-              <Route
-                path={`${path}/add`}
-                render={(props) => (
-                  <PageTitle name={"Add Product"} {...props} />
-                )}
-              />
             </Switch>
           </div>
           <main className="overflow-x-hidden w-full h-full">
@@ -68,7 +63,7 @@ export default function Dashboard() {
               />
               <Route
                 path="/admin/en/products/edit/:id"
-                component={AddProduct}
+                component={EditProduct}
               />
               <Route exact path="/admin/en/orders" component={OrdersPage} />
               <Redirect from="/admin/en" to="/admin/en/dashboard" />
