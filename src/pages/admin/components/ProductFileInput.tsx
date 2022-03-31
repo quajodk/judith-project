@@ -1,6 +1,8 @@
 import { CogIcon, TrashIcon } from "@heroicons/react/outline";
 import React, { useEffect, useRef, useState } from "react";
 import useFileUpload from "../../../hooks/useFileUpload";
+import useGetProductFile from "../../../hooks/useGetProductFile";
+import { extractFileNameFromLink } from "../../../utils";
 
 interface Props {
   productName?: string;
@@ -8,6 +10,8 @@ interface Props {
   setProductName: (name: string) => void;
   id: string;
   setExt?: (ext: string) => void;
+  isEditing?: boolean;
+  fileId?: string;
 }
 
 const ProductFileInput = ({
@@ -16,16 +20,41 @@ const ProductFileInput = ({
   setProductFileUrl,
   setProductName,
   setExt,
+  isEditing,
+  fileId,
 }: Props) => {
+  const [fileLink, setFileLink] = useState<string>();
   const [file, setFile] = useState<File>();
   const fileInput = useRef<HTMLInputElement>(null);
   const { loading, fileUrl, uploadFiles, deleteFile } = useFileUpload();
-  const init = useRef({ setProductFileUrl });
+  const {
+    loading: fileLoading,
+    productFile,
+    error,
+  } = useGetProductFile(fileId);
+  const init = useRef({ setProductFileUrl, setExt, setFile, setProductName });
 
   useEffect(() => {
     const { setProductFileUrl } = init.current;
     if (!loading) setProductFileUrl(fileUrl as string);
   }, [loading, fileUrl]);
+
+  useEffect(() => {
+    const { setExt, setFile, setProductName } = init.current;
+    if (productFile && !fileLoading) {
+      setFileLink(productFile.fileUrl);
+      const filename = extractFileNameFromLink(productFile.fileUrl, "product");
+      setProductName(filename);
+      const newFile = new File([], filename);
+      setFile(newFile);
+      setExt && setExt(productFile.ext as string);
+    }
+
+    if (error) {
+      setProductName("Error occured loading file");
+      setFile(undefined);
+    }
+  }, [productFile, error, fileLoading]);
 
   const pickFile = () => {
     if (fileInput?.current) fileInput?.current.click();
@@ -44,7 +73,7 @@ const ProductFileInput = ({
     <div className="mt-1 flex items-center">
       <span className="p-2 bg-gray-100 text-sm rounded-sm mr-1 flex items-center">
         {productName}
-        {fileUrl && (
+        {fileLink && (
           <span
             className="cursor-pointer hover:opacity-80 text-xs flex items-center justify-start"
             onClick={(e) => {
@@ -57,11 +86,13 @@ const ProductFileInput = ({
           </span>
         )}
       </span>
-      {loading && (
+
+      {(loading || fileLoading) && (
         <span className="p-2 bg-gray-100 text-sm rounded-sm text-green-300">
           <CogIcon className="h-6 w-6 animate-spin" />
         </span>
       )}
+
       <button
         type="button"
         className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

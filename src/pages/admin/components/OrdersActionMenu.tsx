@@ -1,41 +1,24 @@
-import { EyeIcon, PencilAltIcon } from "@heroicons/react/outline";
+import { EyeIcon } from "@heroicons/react/outline";
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import Modal from "../../../components/Modal";
-import { IProduct } from "../../../utils/models";
-import ViewProduct from "./ViewProduct";
-// import { useAppDispatch } from "../../../redux/hooks";
+import ViewOrder from "./ViewOrder";
 
 type Props = {
   order: Record<string, any>;
   className?: string;
 };
 
-const ActionMenu = ({
+const OrderActionMenu = ({
   order,
   className = "inline-flex items-center justify-start",
 }: Props) => {
   const [viewModal, setViewModal] = useState(false);
-  // const dispatch = useAppDispatch();
-  const history = useHistory();
 
   const actions = [
-    {
-      title: "Edit",
-      icon: (
-        <PencilAltIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-      ),
-      onClick: () => {
-        // dispatch()
-        history.push(`/admin/en/products/edit/${order.id}`);
-      },
-    },
     {
       title: "View",
       icon: <EyeIcon className="h-5 w-5 text-indigo-400" aria-hidden="true" />,
       onClick: () => {
-        //   dispatch(setOrder(order));
-        //   navigate("/app/tendo/order");
         setViewModal(true);
       },
     },
@@ -59,13 +42,10 @@ const ActionMenu = ({
         ))}
       </div>
       <Modal open={viewModal} setopen={() => setViewModal(!viewModal)}>
-        <ViewProduct
-          product={order as IProduct}
-          closeModal={() => setViewModal(!viewModal)}
-        />
+        <ViewOrder order={order} closeModal={() => setViewModal(!viewModal)} />
       </Modal>
     </>
   );
 };
 
-export default ActionMenu;
+export default OrderActionMenu;

@@ -68,3 +68,25 @@ export const getCardType = (number: string) => {
   }
   return undefined;
 };
+
+export const extractFileNameFromLink = (link: string, folder?: string) => {
+  if (!link) return "";
+  const fileName = link.substring(link.lastIndexOf("/") + 1);
+
+  if (folder) {
+    return fileName
+      ?.replace("%2F", "")
+      ?.split(folder)[1]
+      ?.split("?")[0]
+      .replace("%2F", "")
+      .replace("%20", " ")
+      .trim();
+  }
+  return fileName
+    .replace("%2F", "")
+    .split("media")[1]
+    .split("?")[0]
+    .replace("%2F", "")
+    .replace("%20", " ")
+    .trim();
+};
