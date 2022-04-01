@@ -98,7 +98,6 @@ const EditProduct = (props: Props) => {
     dispatch(addProduct(product));
   };
 
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
