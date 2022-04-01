@@ -40,8 +40,9 @@ const ProductFileInput = ({
   }, [loading, fileUrl]);
 
   useEffect(() => {
-    const { setExt, setFile, setProductName } = init.current;
+    const { setExt, setFile, setProductName, setProductFileUrl } = init.current;
     if (productFile && !fileLoading) {
+      setProductFileUrl(fileId as string);
       setFileLink(productFile.fileUrl);
       const filename = extractFileNameFromLink(productFile.fileUrl, "product");
       setProductName(filename);
@@ -54,7 +55,7 @@ const ProductFileInput = ({
       setProductName("Error occured loading file");
       setFile(undefined);
     }
-  }, [productFile, error, fileLoading]);
+  }, [productFile, error, fileLoading, fileId]);
 
   const pickFile = () => {
     if (fileInput?.current) fileInput?.current.click();
