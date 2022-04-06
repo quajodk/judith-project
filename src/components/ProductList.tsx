@@ -1,5 +1,5 @@
-import { CogIcon } from "@heroicons/react/outline";
 import { useEffect, useRef /*useState*/ } from "react";
+import { AiOutlineLoading } from "react-icons/ai";
 import { getProducts } from "../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { IProduct } from "../utils/models";
@@ -12,34 +12,27 @@ export default function ProductList() {
   );
 
   const loadMore = () => {
-    console.log("this get called");
-    if (lastDocRef && products.length !== total) {
-      dispatch(getProducts(lastDocRef));
-    }
+    dispatch(getProducts(lastDocRef));
   };
 
   const init = useRef({
-    dispatch,
     loadMore,
   });
 
   useEffect(() => {
-    const { dispatch, loadMore } = init.current;
-    if (total === 0) {
-      dispatch(getProducts());
-    } else {
-      loadMore();
+    if (products.length === 0) {
+      init.current.loadMore();
     }
-  }, [total]);
+  }, [products.length]);
 
-  console.log(total);
+  console.log(total, products.length, lastDocRef);
 
   if (products.length === 0 && fetchingProduct) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="text-center">
           <div className="flex flex-col justify-center items-center">
-            <CogIcon className="h-6 w-6 animate-spin text-green-500" />
+            <AiOutlineLoading className="h-10 w-10 animate-spin text-green-500" />
             Loading...
           </div>
         </div>
@@ -52,8 +45,7 @@ export default function ProductList() {
       <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="text-center">
           <div className="flex flex-col justify-center items-center">
-            <span></span>
-            No products found
+            <span>No products found</span>
           </div>
         </div>
       </div>
@@ -68,6 +60,17 @@ export default function ProductList() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+        {products.length !== total && (
+          <div className="flex w-full items-center justify-center">
+            <button
+              type="button"
+              className="bg-purple-200 rounded-md p-3 mx-auto mt-12 text-sm"
+              onClick={() => loadMore()}
+            >
+              Load More
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

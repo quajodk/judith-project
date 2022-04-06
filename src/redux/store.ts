@@ -28,18 +28,7 @@ const sagaMiddleware = createSagaMiddleware();
 const persistConfig = {
   key: "root",
   storage,
-  blacklist: [
-    "loadingProducts",
-    "loadingCategories",
-    "loadingOrders",
-    "addingProduct",
-    "addingCategory",
-    "products",
-    "lastDocRef",
-    "openCart",
-    "products",
-    "total",
-  ],
+  blacklist: ["app"],
 };
 
 const persistedReducers = persistReducer(persistConfig, reducers);
@@ -56,8 +45,8 @@ const store = configureStore({
   devTools: process.env.NODE_ENV !== "production",
 });
 
-const persistor = persistStore(store);
-
 sagaMiddleware.run(rootSaga);
+
+const persistor = persistStore(store);
 
 export { store as default, persistor };

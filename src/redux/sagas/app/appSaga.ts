@@ -206,18 +206,17 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       }
       break;
     case GET_PRODUCTS:
-      yield put(setFetchingProduct(true));
       try {
-        const state: ReturnType<typeof selector> = yield selectState(
-          selector
-        ) as unknown as ReturnType<typeof selector>;
+        yield put(setFetchingProduct(true));
+
+        const state: RootState = yield select(selector);
 
         const result: Record<string, any> = yield call(
           firebase.getProducts,
           payload
         );
 
-        if (result?.product?.length !== 0) {
+        if (result?.products?.length !== 0) {
           yield put(
             addProduct({
               products: result.products,
@@ -227,22 +226,22 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
               total: result.total ? result.total : state.app.total,
             })
           );
-          yield put(setFetchingProduct(false));
         } else {
-          yield put(setFetchingProduct(false));
           yield put(addProduct({ products: [], lastDocRef: null, total: 0 }));
         }
+        yield put(setFetchingProduct(false));
       } catch (error) {
+        yield put(setFetchingProduct(false));
         yield console.log(error);
       }
       break;
     case ORDER_PRODUCT:
-      const state: ReturnType<typeof selector> = yield selectState(
-        selector
-      ) as unknown as ReturnType<typeof selector>;
-
-      const app = state.app;
       try {
+        const state: ReturnType<typeof selector> = yield selectState(
+          selector
+        ) as unknown as ReturnType<typeof selector>;
+
+        const app = state.app;
         const orderObj: ICheckoutOrder = {
           id: app.cart?.id as string,
           date: payload.created_at,

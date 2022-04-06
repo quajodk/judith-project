@@ -17,11 +17,11 @@ import {
   SIGN_OUT,
   TOGGLE_CART,
 } from "./../../utils/constants/index";
-import { takeEvery } from "redux-saga/effects";
+import { /*takeEvery,*/ takeLatest } from "redux-saga/effects";
 import appSaga from "./app/appSaga";
 
 function* rootSaga() {
-  yield takeEvery(
+  yield takeLatest(
     [
       ADD_TO_CART,
       CLOSE_NOTIFICATION,

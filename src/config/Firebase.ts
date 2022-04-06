@@ -141,64 +141,58 @@ class Firebase {
   public sendMail = async (mail: Record<string, any>) =>
     await addDoc(collection(this.db, "mails"), mail);
 
-  public getProducts = (lastDocRef?: DocumentReference) => {
-    return new Promise((resolve, reject) => {
-      (async () => {
-        if (lastDocRef) {
-          try {
-            const docQuery = query(
-              collection(this.db, "products"),
-              orderBy("createdAt", "desc"),
-              startAfter(lastDocRef),
-              limit(10)
-            );
+  public getProducts = async (lastDocRef?: DocumentReference) => {
+    if (lastDocRef) {
+      try {
+        const docQuery = query(
+          collection(this.db, "products"),
+          orderBy("createdAt"),
+          startAfter(lastDocRef),
+          limit(12)
+        );
 
-            const snapshot = await getDocs(docQuery);
-            const products = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-              createdAt: doc
-                .data()
-                .createdAt.toDate()
-                .toLocaleDateString("en-GB"),
-            }));
+        const snapshot = await getDocs(docQuery);
+        console.log(snapshot, "snapshot");
+        const products = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt.toDate().toLocaleDateString("en-GB"),
+        }));
 
-            const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
-            resolve({ products, lastDoc });
-          } catch (error) {
-            reject(error);
-          }
-        } else {
-          try {
-            const totalQuery = query(collection(this.db, "products"));
-            const snap = await getDocs(totalQuery);
-            const total = snap.size;
-            const docQuery = query(
-              collection(this.db, "products"),
-              orderBy("createdAt", "desc"),
-              limit(10)
-            );
+        return { products, lastDoc };
+      } catch (error) {
+        console.log(error);
+        return error;
+      }
+    } else {
+      try {
+        const totalQuery = query(collection(this.db, "products"));
+        const snap = await getDocs(totalQuery);
+        const total = snap.size;
+        const docQuery = query(
+          collection(this.db, "products"),
+          orderBy("createdAt"),
+          limit(12)
+        );
 
-            const snapshot = await getDocs(docQuery);
-            const products = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-              createdAt: doc
-                .data()
-                .createdAt.toDate()
-                .toLocaleDateString("en-GB"),
-            }));
+        const snapshot = await getDocs(docQuery);
+        console.log(snapshot, "snapshot without lastDoc");
+        const products = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt.toDate().toLocaleDateString("en-GB"),
+        }));
 
-            const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
-            resolve({ products, lastDoc, total });
-          } catch (error) {
-            reject(error);
-          }
-        }
-      })();
-    });
+        return { products, lastDoc, total };
+      } catch (error) {
+        console.log(error);
+        return error;
+      }
+    }
   };
 
   public getCategories = () => {
