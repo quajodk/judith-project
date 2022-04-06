@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DocumentReference } from "firebase/firestore/lite";
 import { uuid } from "uuidv4";
 import {
   ICategory,
@@ -20,7 +21,7 @@ interface AppState {
   adminUser: IUser | null;
   currentRoute: string;
   isAuthenticating: boolean;
-  lastDocRef: any | null;
+  lastDocRef?: DocumentReference;
   total: number;
   paymentSuccess: boolean;
   categories: ICategory[];
@@ -49,7 +50,7 @@ const initialState: AppState = {
   adminUser: null,
   currentRoute: "",
   isAuthenticating: true,
-  lastDocRef: null,
+  lastDocRef: undefined,
   total: 0,
   paymentSuccess: false,
   categories: [],
@@ -72,7 +73,7 @@ const appReducer = createSlice({
   initialState,
   reducers: {
     addProduct: (state, action) => {
-      state.products = [...action.payload.products, ...state.products];
+      state.products = [...state.products, ...action.payload.products];
       state.lastDocRef = action.payload.lastDocRef;
       state.total = action.payload.total;
     },
