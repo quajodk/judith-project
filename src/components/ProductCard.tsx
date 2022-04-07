@@ -27,7 +27,13 @@ const ProductCard = (props: Props) => {
           />
         </div>
         <div className="relative mt-4 flex flex-col">
-          <h3 className="text-sm font-medium text-gray-900">{product.title}</h3>
+          <h3 className="text-sm font-medium text-gray-900 pb-2">
+            {product.title}
+          </h3>
+          <span className="text-base font-semibold text-gray-500 flex space-x-2">
+            {product?.currency}
+            {product.price}
+          </span>
           <span
             className={`mt-1 text-xs text-gray-500 p-0.5 ${
               product.isAvailable ? "bg-green-300" : "bg-yellow-300"
@@ -36,7 +42,7 @@ const ProductCard = (props: Props) => {
             {product.isAvailable ? "Available" : "Out of stock"}
           </span>
         </div>
-        <div className="absolute top-0 inset-x-0 h-72 rounded-lg p-4 flex items-end justify-end overflow-hidden">
+        {/* <div className="absolute top-0 inset-x-0 h-72 rounded-lg p-4 flex items-end justify-end overflow-hidden">
           <div
             aria-hidden="true"
             className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black opacity-50"
@@ -45,7 +51,7 @@ const ProductCard = (props: Props) => {
             {product?.currency}
             {product.price}
           </p>
-        </div>
+        </div> */}
       </div>
       <div className="mt-6">
         <button
