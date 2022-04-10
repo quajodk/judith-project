@@ -94,7 +94,7 @@ const EditProduct = (props: Props) => {
       fileType: ext,
       createdAt: new Date(),
     };
-    console.log(product);
+  
     dispatch(addProduct(product));
   };
 
@@ -109,6 +109,7 @@ const EditProduct = (props: Props) => {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
+
 
   return (
     <>

@@ -57,10 +57,13 @@ export default function CheckoutForm() {
       );
       if (result.status) {
         window.location.href = result.data.authorization_url;
+        setLoading(false);
       }
-      setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
