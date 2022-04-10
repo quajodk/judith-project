@@ -12,11 +12,9 @@ import Modal from "../../../components/Modal";
 import AddCategory from "./AddCategory";
 import _ from "lodash";
 
-
 interface Props {}
 
 export default function AddProduct(prop: Props) {
-
   const [enabled, setEnabled] = useState(false);
   const [currency, setCurrency] = useState<string>();
   const [tags, setTags] = useState<Record<string, any>[]>([]);

@@ -36,7 +36,10 @@ const ProductFileInput = ({
 
   useEffect(() => {
     const { setProductFileUrl } = init.current;
-    if (!loading) setProductFileUrl(fileUrl as string);
+    if (!loading && fileUrl) {
+      setProductFileUrl(fileUrl as string);
+      setFileLink(fileUrl as string);
+    }
   }, [loading, fileUrl]);
 
   useEffect(() => {

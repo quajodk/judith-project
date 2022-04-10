@@ -1,5 +1,6 @@
 import { XIcon } from "@heroicons/react/outline";
 import { CheckIcon } from "@heroicons/react/solid";
+import { AiOutlineLoading } from "react-icons/ai";
 import { useHistory, useParams } from "react-router-dom";
 import useGetProduct from "../hooks/useGetProduct";
 import { addToCart } from "../redux/actions/appActions";
@@ -12,7 +13,11 @@ export default function ProductDetails() {
   const history = useHistory();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <AiOutlineLoading className="h-8 w-8 text-green-500" />
+      </div>
+    );
   }
 
   if (error) {
