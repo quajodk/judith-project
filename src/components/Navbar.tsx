@@ -47,7 +47,7 @@ export default function Navbar() {
                     >
                       Home
                     </NavLink>
-                    <NavLink
+                    {/* <NavLink
                       to="/clothes"
                       className={`
                         border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
@@ -69,7 +69,7 @@ export default function Navbar() {
                       activeClassName="border-indigo-500"
                     >
                       Others
-                    </NavLink>
+                    </NavLink> */}
                   </div>
                 </div>
                 <div className="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
