@@ -37,6 +37,9 @@ interface AppState {
   customer: ICustomer | null;
   fetchingProduct: boolean;
   done: boolean;
+  exchangeRate: number;
+  countryCode: string;
+  ipObject: Record<string, any> | null;
 }
 
 const initialState: AppState = {
@@ -66,6 +69,9 @@ const initialState: AppState = {
   customer: null,
   fetchingProduct: false,
   done: false,
+  exchangeRate: 1,
+  countryCode: "GH",
+  ipObject: null,
 };
 
 const appReducer = createSlice({
@@ -99,14 +105,20 @@ const appReducer = createSlice({
           : {
               ...cart,
               products: [...cart.products, { product, quantity: 1 }],
-              totalPrice: cart.totalPrice + product.price,
+              totalPrice:
+                state.countryCode.toLowerCase() !== "gh"
+                  ? (cart.totalPrice + product.price) / state.exchangeRate
+                  : cart.totalPrice + product.price,
             };
       } else {
         state.cart = {
           id: uuid(),
           products: [{ product, quantity: 1 }],
           date: new Date().toLocaleDateString(),
-          totalPrice: product.price,
+          totalPrice:
+            state.countryCode.toLowerCase() !== "gh"
+              ? product.price / state.exchangeRate
+              : product.price,
         };
       }
       state.totalCartItems = state.totalCartItems + 1;
@@ -201,6 +213,15 @@ const appReducer = createSlice({
     setDone: (state, action: PayloadAction<boolean>) => {
       state.done = action.payload;
     },
+    setExchangeRate: (state, action: PayloadAction<number>) => {
+      state.exchangeRate = action.payload;
+    },
+    setCountryCode: (state, action: PayloadAction<string>) => {
+      state.countryCode = action.payload;
+    },
+    setIpObject: (state, action: PayloadAction<Record<string, any> | null>) => {
+      state.ipObject = action.payload;
+    },
   },
 });
 
@@ -231,6 +252,9 @@ export const {
   setCustomer,
   setFetchingProduct,
   setDone,
+  setExchangeRate,
+  setCountryCode,
+  setIpObject,
 } = appReducer.actions;
 
 export default appReducer.reducer;
