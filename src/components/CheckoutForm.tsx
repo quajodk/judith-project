@@ -14,7 +14,9 @@ interface ICheckoutItem {
 }
 
 export default function CheckoutForm() {
-  const { cart, totalCartItems } = useAppSelector((state) => state.app);
+  const { cart, totalCartItems, countryCode } = useAppSelector(
+    (state) => state.app
+  );
   const history = useHistory();
   const { products, totalPrice } = cart as IOrder;
   const [orderObj, setOrderObj] = useState<Record<string, any>>({});
@@ -37,7 +39,7 @@ export default function CheckoutForm() {
       ...orderObj,
       callback_url,
       amount: totalPrice,
-      currency: "GHS",
+      currency: countryCode.toLowerCase() !== "gh" ? "USD" : "GHS",
       reference: (cart?.id as string) + Date.now(),
       channel: ["card", "mobile_money"],
     };
@@ -101,7 +103,8 @@ export default function CheckoutForm() {
             <dl>
               <dt className="text-sm font-medium">Amount due</dt>
               <dd className="mt-1 text-3xl font-extrabold text-white">
-                GHS {cart?.totalPrice ?? 0}
+                {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+                {cart?.totalPrice ?? 0}
               </dd>
             </dl>
 
@@ -236,6 +239,7 @@ export default function CheckoutForm() {
 
 const CheckoutItem = (props: ICheckoutItem) => {
   const { product, qty } = props;
+  const { countryCode, exchangeRate } = useAppSelector((state) => state.app);
   return (
     <li key={product.id} className="flex items-start py-6 space-x-4">
       <img
@@ -249,7 +253,10 @@ const CheckoutItem = (props: ICheckoutItem) => {
         <p>{qty ?? 1}</p>
       </div>
       <p className="flex-none text-base font-medium text-white">
-        GHS {product.price}
+        {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+        {countryCode.toLowerCase() !== "gh"
+          ? product.price / exchangeRate
+          : product.price}
       </p>
     </li>
   );

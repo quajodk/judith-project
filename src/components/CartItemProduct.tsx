@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { removeFromCart, toggleCart } from "../redux/actions/appActions";
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { ICartItem } from "../utils/models";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const CartItemProduct = (props: Props) => {
+  const { countryCode, exchangeRate } = useAppSelector((state) => state.app);
   const dispatch = useAppDispatch();
   const { cartItem } = props;
   const { product } = cartItem;
@@ -33,7 +34,12 @@ const CartItemProduct = (props: Props) => {
                 {product.title}
               </Link>
             </h3>
-            <p className="ml-4">GHS {product.price}</p>
+            <p className="ml-4">
+              {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+              {countryCode.toLowerCase() !== "gh"
+                ? product.price / exchangeRate
+                : product.price}
+            </p>
           </div>
           <p className="mt-1 text-sm text-gray-500">{product.color}</p>
         </div>

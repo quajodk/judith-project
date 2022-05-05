@@ -15,6 +15,7 @@ const persistConfig = {
     "openCart",
     "done",
     "fetchingProduct",
+    "countryCode",
   ],
 };
 

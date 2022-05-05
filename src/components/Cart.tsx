@@ -16,7 +16,7 @@ interface CartProps {
 export default function Cart(props: CartProps) {
   const { open, setOpen } = props;
   const dispatch = useAppDispatch();
-  const cart = useAppSelector((state) => state.app?.cart);
+  const { cart, countryCode } = useAppSelector((state) => state.app);
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -94,7 +94,10 @@ export default function Cart(props: CartProps) {
                   <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Subtotal</p>
-                      <p>GHS {cart?.totalPrice ?? 0.0}</p>
+                      <p>
+                        {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+                        {cart?.totalPrice ?? 0.0}
+                      </p>
                     </div>
                     <p className="mt-0.5 text-sm text-gray-500">
                       Shipping and taxes calculated at checkout.

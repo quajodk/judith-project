@@ -1,7 +1,7 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { addToCart } from "../redux/actions/appActions";
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { IProduct } from "../utils/models";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const ProductCard = (props: Props) => {
+  const { countryCode, exchangeRate } = useAppSelector((state) => state.app);
   const { product } = props;
   const dispatch = useAppDispatch();
   const history = useHistory();
@@ -31,8 +32,10 @@ const ProductCard = (props: Props) => {
             {product.title}
           </h3>
           <span className="text-base font-semibold text-gray-500 flex space-x-2">
-            {product?.currency}
-            {product.price}
+            {countryCode.toLowerCase() !== "gh" ? "$" : product?.currency}
+            {countryCode.toLowerCase() !== "gh"
+              ? product.price / exchangeRate
+              : product.price}
           </span>
           <span
             className={`mt-1 text-xs text-gray-500 p-0.5 ${
