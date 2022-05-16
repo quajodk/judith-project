@@ -59,8 +59,8 @@ export default function CheckoutForm() {
       );
       if (result.status) {
         window.location.href = result.data.authorization_url;
-        setLoading(false);
       }
+      setLoading(false);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -168,6 +168,7 @@ export default function CheckoutForm() {
                       id="first_name"
                       name="first_name"
                       autoComplete="first_name"
+                      value={orderObj?.first_name}
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       onChange={handleChange}
                     />
@@ -187,6 +188,7 @@ export default function CheckoutForm() {
                       id="last_name"
                       name="last_name"
                       autoComplete="last_name"
+                      value={orderObj?.last_name}
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       onChange={handleChange}
                     />
@@ -206,6 +208,7 @@ export default function CheckoutForm() {
                       id="email-address"
                       name="email"
                       autoComplete="email"
+                      value={orderObj?.email}
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       onChange={handleChange}
                     />
