@@ -14,7 +14,7 @@ interface ICheckoutItem {
 }
 
 export default function CheckoutForm() {
-  const { cart, totalCartItems, countryCode } = useAppSelector(
+  const { cart, totalCartItems, countryCode, exchangeRate } = useAppSelector(
     (state) => state.app
   );
   const history = useHistory();
@@ -38,10 +38,16 @@ export default function CheckoutForm() {
     const payObj = {
       ...orderObj,
       callback_url,
-      amount: totalPrice,
-      currency: countryCode.toLowerCase() !== "gh" ? "USD" : "GHS",
+      amount:
+        countryCode.toLowerCase() !== "gh"
+          ? totalPrice * exchangeRate
+          : totalPrice,
+      currency: "GHS",
       reference: (cart?.id as string) + Date.now(),
-      channel: ["card", "mobile_money"],
+      channel:
+        countryCode.toLowerCase() !== "gh"
+          ? ["card"]
+          : ["card", "mobile_money"],
     };
 
     dispatch(
@@ -126,12 +132,18 @@ export default function CheckoutForm() {
 
               <div className="flex items-center justify-between">
                 <dt>Subtotal</dt>
-                <dd>GHS {cart?.totalPrice ?? 0}</dd>
+                <dd>
+                  {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+                  {cart?.totalPrice ?? 0}
+                </dd>
               </div>
 
               <div className="flex items-center justify-between border-t border-white border-opacity-10 text-white pt-6">
                 <dt className="text-base">Total</dt>
-                <dd className="text-base">GHS {cart?.totalPrice ?? 0}</dd>
+                <dd className="text-base">
+                  {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
+                  {cart?.totalPrice ?? 0}
+                </dd>
               </div>
             </dl>
           </div>
