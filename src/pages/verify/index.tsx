@@ -15,6 +15,7 @@ const VerifyPayment = (props: Props) => {
   const location = useLocation();
   const callbackLink = new URLSearchParams(location.search);
   const reference = callbackLink.get("reference") ?? "";
+  const status = callbackLink.get("status") ?? "";
   const history = useHistory();
   const init = useRef({ dispatch });
 
@@ -38,6 +39,8 @@ const VerifyPayment = (props: Props) => {
   if (error) {
     return <ErrorPayment error={error} retryFn={verifyPaymentRetry} />;
   }
+
+  console.log(status);
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-50">

@@ -20,7 +20,7 @@ const useGetUserIP = () => {
       .then((res) => {
         dispatch(setIpObject(res.data));
         if (res.data.country_code !== "GH") dispatch(setExchangeRate(8.0));
-        dispatch(setCountryCode(res.data.country_code));
+        dispatch(setCountryCode("NG"));
       })
       .catch((err) => {
         console.log(err);

@@ -21,6 +21,7 @@ jobs:
           REACT_APP_PAYSTACK_KEY_DEV: ${{secrets.PAYSTACK_KEY_DEV}}
           REACT_APP_PAYSTACK_KEY: ${{secrets.PAYSTACK_KEY}}
           REACT_APP_PAYSTACK_SECRET_KEY: ${{secrets.PAYSTACK_SECRET_KEY}}
+          REACT_APP_COINBASE_KEY: ${{secrets.COINBASE_KEY}}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.FIREBASE_TOKEN }}'

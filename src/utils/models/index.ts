@@ -68,3 +68,19 @@ export interface IPaymentParams {
   last_name?: string;
   callback_url?: string;
 }
+
+export interface ICryptoPaymentParams {
+  name: string;
+  description?: string;
+  local_price: {
+    amount: string;
+    currency?: string;
+  };
+  pricing_type?: string;
+  metadata?: {
+    customer_id?: string;
+    customer_name?: string;
+  };
+  redirect_url: string;
+  cancel_url: string;
+}

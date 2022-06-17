@@ -20,7 +20,7 @@ const AuthWrapper = ({ children }: Props) => {
 
   if (isAuthenticating) return <PageLoader />;
 
-  return <>{children}</>;
+  return <div className="min-w-screen">{children}</div>;
 };
 
 export default AuthWrapper;
