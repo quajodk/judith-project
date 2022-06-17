@@ -7,21 +7,35 @@ type RequestParamsType = {
   token?: string | null | undefined;
   params?: {} | undefined;
   contentType?: string | undefined;
+  keys?: string | null;
 };
 
 class NetworkService {
   private BASE_URL: string;
-  constructor(baseUrl: string) {
+  private token?: string | null;
+  private api_key?: string | null;
+  constructor({
+    baseUrl,
+    token,
+    api_key,
+  }: {
+    baseUrl: string;
+    token?: string | null | undefined;
+    api_key?: string | null | undefined;
+  }) {
     this.BASE_URL = baseUrl;
+    this.token = token;
+    this.api_key = api_key;
   }
 
   private request = async ({
     method,
     url,
     data,
-    token,
+    token = this.token,
     params,
     contentType = "application/json",
+    keys = this.api_key,
   }: RequestParamsType) => {
     const config: AxiosRequestConfig = {
       method,
@@ -37,7 +51,15 @@ class NetworkService {
     if (token) {
       config.headers = {
         ...config.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${this.token}`,
+      };
+    }
+
+    if (keys) {
+      config.headers = {
+        ...config.headers,
+        "X-CC-Api-Key": keys,
+        "X-CC-Version": "2018-03-22",
       };
     }
 
@@ -47,16 +69,14 @@ class NetworkService {
   public get = async ({
     url,
     params,
-    token,
   }: {
     url: string;
-    token?: string | null;
+
     params?: Record<string, any>;
   }) => {
     return await this.request({
       method: "GET",
       url,
-      token,
       params,
     });
   };
@@ -66,7 +86,6 @@ class NetworkService {
       method: "POST",
       url,
       data,
-      token,
     });
   };
 
@@ -75,7 +94,6 @@ class NetworkService {
       method: "PUT",
       url,
       data,
-      token,
     });
   };
 
@@ -83,7 +101,6 @@ class NetworkService {
     return await this.request({
       method: "DELETE",
       url,
-      token,
     });
   };
 }
