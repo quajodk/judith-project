@@ -55,13 +55,21 @@ class PaymentService {
     const data = {
       ...arg,
       pricing_type: "fixed_price",
-      description: "Crypto payment for order",
+      description: "Crypto payment for my order",
       local_price: {
         amount: arg.local_price.amount.toString(),
         currency: "USD",
       },
     };
     const response = await this.request.post("/charges", data);
+
+    return response.data;
+  };
+
+  public resolveCryptoPayment = async (reference: string) => {
+    const response = await this.request.get({
+      url: `/charges/${reference}`,
+    });
 
     return response.data;
   };

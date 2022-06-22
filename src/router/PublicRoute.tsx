@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import Notification from "../components/Notification";
 import { closeNotification } from "../redux/actions/appActions";
 import VerifyPayment from "../pages/verify";
+import CryptoConfirmation from "../pages/verify/components/CryptoConfirmation";
 
 interface Props {}
 
@@ -29,6 +30,7 @@ const PublicRoute = (props: Props) => {
         <Route path="/product/:id" component={ProductPage} />
         <Route exact path="/checkout/:id" component={CheckoutForm} />
         <Route path="/checkout/:id/verify" component={VerifyPayment} />
+        <Route path="/checkout/:id/crypto" component={CryptoConfirmation} />
         <Route path="/" component={HomePage} />
       </Switch>
 

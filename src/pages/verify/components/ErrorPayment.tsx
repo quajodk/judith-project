@@ -3,7 +3,7 @@ import { ReactComponent as Error } from "../../../assets/images/payment-error.sv
 
 type Props = {
   error: any;
-  retryFn: () => void;
+  retryFn?: () => void;
 };
 
 const ErrorPayment = ({ error, retryFn }: Props) => {
@@ -16,12 +16,14 @@ const ErrorPayment = ({ error, retryFn }: Props) => {
       <span className="my-2 text-gray-400 text-semibold text-xs">
         {error?.message}
       </span>
-      <button
-        className="text-purple-800 text-semibold text-sm bg-purple-400"
-        onClick={retryFn}
-      >
-        Retry
-      </button>
+      {retryFn && (
+        <button
+          className="text-purple-800 text-semibold text-sm bg-purple-400"
+          onClick={retryFn}
+        >
+          Retry
+        </button>
+      )}
     </div>
   );
 };

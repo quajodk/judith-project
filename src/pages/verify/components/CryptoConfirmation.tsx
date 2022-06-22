@@ -1,31 +1,33 @@
 import React, { useEffect, useRef } from "react";
-import { useHistory, useLocation } from "react-router-dom";
-import CheckingPayment from "./components/CheckingPayment";
-import ErrorPayment from "./components/ErrorPayment";
-import useVerifyPayment from "./hooks/useVerifyPayment";
-import { ReactComponent as PaymentDone } from "../../assets/images/payment-success.svg";
-import { ReactComponent as PaymentNotOk } from "../../assets/images/payment-notok.svg";
-import { orderProduct } from "../../redux/actions/appActions";
-import { useAppDispatch } from "../../redux/hooks";
+import { useHistory } from "react-router-dom";
+import { orderProduct } from "../../../redux/actions/appActions";
+import { useAppDispatch } from "../../../redux/hooks";
+import useCryptoPaymentConfirmation from "../hooks/useCryptoPaymentConfirmation";
+import CheckingPayment from "./CheckingPayment";
+import ErrorPayment from "./ErrorPayment";
+import { ReactComponent as PaymentDone } from "../../../assets/images/payment-success.svg";
+import { ReactComponent as PaymentNotOk } from "../../../assets/images/payment-notok.svg";
+import _ from "lodash";
 
 type Props = {};
 
-const VerifyPayment = (props: Props) => {
+const CryptoConfirmation = (props: Props) => {
   const dispatch = useAppDispatch();
-  const location = useLocation();
-  const callbackLink = new URLSearchParams(location.search);
-  const reference = callbackLink.get("reference") ?? "";
   const history = useHistory();
   const init = useRef({ dispatch });
 
-  const { data, error, loading, verifyPaymentRetry } =
-    useVerifyPayment(reference);
+  const { data, error, loading, retryConfirmation, shouldRetry } =
+    useCryptoPaymentConfirmation();
 
   useEffect(() => {
     const { dispatch } = init.current;
-    if (data && data.data.status === "success") {
+    if (data && data?.success) {
       const order = {
-        ...data.data,
+        channel: "crypto",
+        created_at: data.data.created_at,
+        status: data.data.type.split(":")[1],
+        currency: "btc",
+        transaction_date: new Date().toISOString(),
       };
       dispatch(orderProduct(order));
     }
@@ -36,12 +38,17 @@ const VerifyPayment = (props: Props) => {
   }
 
   if (error) {
-    return <ErrorPayment error={error} retryFn={verifyPaymentRetry} />;
+    return (
+      <ErrorPayment
+        error={error}
+        retryFn={shouldRetry ? retryConfirmation : undefined}
+      />
+    );
   }
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-50">
-      {data && data?.data?.status === "success" ? (
+      {data && data?.success ? (
         <>
           <PaymentDone className="h-52 w-52" />
           <span className="my-2 text-green-600 text-semibold text-sm">
@@ -62,8 +69,8 @@ const VerifyPayment = (props: Props) => {
       ) : (
         <>
           <PaymentNotOk className="h-52 w-52" />
-          <span className="my-2 text-green-600 text-semibold text-sm">
-            {data?.data?.gateway_response}
+          <span className="my-2 text-yellow-600 text-semibold text-sm">
+            {_.startCase(data?.message)}
           </span>
 
           <button
@@ -79,4 +86,4 @@ const VerifyPayment = (props: Props) => {
   );
 };
 
-export default VerifyPayment;
+export default CryptoConfirmation;
