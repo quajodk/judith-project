@@ -30,6 +30,7 @@ export default function CheckoutForm() {
   const { products, totalPrice } = cart as IOrder;
   const [orderObj, setOrderObj] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const [payWith, setPayWith] = useState("");
   const url = window.location.host;
   const protocol = window.location.protocol;
@@ -58,17 +59,22 @@ export default function CheckoutForm() {
     };
 
     const paymentParams: ICryptoPaymentParams = {
-      cancel_url: `${protocol}//${url}/checkout/${cart?.id}/verify?status=cancelled`,
+      cancel_url: `${protocol}//${url}/checkout/${cart?.id}`,
       local_price: {
         amount: (totalPrice / exchangeRate).toString(),
       },
       name: `Payment for ${cart?.id}`,
-      redirect_url: `${protocol}//${url}/checkout/${cart?.id}/verify`,
+      redirect_url: `${protocol}//${url}/checkout/${cart?.id}/crypto`,
       metadata: {
         customer_id: orderObj?.email,
         customer_name: `${orderObj.first_name} ${orderObj.last_name}`,
       },
     };
+
+    if (["", undefined, null].includes(orderObj?.email)) {
+      setEmailError(true);
+      return;
+    }
 
     dispatch(
       setCustomer({
@@ -273,8 +279,14 @@ export default function CheckoutForm() {
                         value={orderObj?.email}
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         onChange={handleChange}
+                        required
                       />
                     </div>
+                    {emailError && (
+                      <span className="text-red-500 text-sm mt-2">
+                        Please enter your email
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -298,7 +310,7 @@ export default function CheckoutForm() {
                     className="text-indigo-500 text-sm font-medium cursor-pointer mt-4"
                     onClick={() => {
                       if (payWith === "paystack") {
-                        alert("Crypto payment is coming soon");
+                        setPayWith("coinbase");
                       } else {
                         setPayWith("paystack");
                       }
@@ -330,7 +342,7 @@ export default function CheckoutForm() {
               <button
                 type="submit"
                 className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-4 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500 flex items-center justify-center w-full"
-                onClick={() => alert("Crypto payment is coming soon")}
+                onClick={() => setPayWith("coinbase")}
               >
                 Pay with crypto <FaBitcoin className="h-4 w-4 ml-2" />
               </button>
