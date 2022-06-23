@@ -61,7 +61,7 @@ export default function CheckoutForm() {
     const paymentParams: ICryptoPaymentParams = {
       cancel_url: `${protocol}//${url}/checkout/${cart?.id}`,
       local_price: {
-        amount: (totalPrice / exchangeRate).toString(),
+        amount: (totalPrice / 7.5).toString(),
       },
       name: `Payment for ${cart?.id}`,
       redirect_url: `${protocol}//${url}/checkout/${cart?.id}/crypto`,
