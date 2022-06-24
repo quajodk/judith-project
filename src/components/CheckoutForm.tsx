@@ -16,6 +16,7 @@ import {
 import { uuid } from "uuidv4";
 import { ReactComponent as Payment } from "../assets/images/payment.svg";
 import { FaBitcoin, FaCreditCard } from "react-icons/fa";
+import { ExclamationIcon } from "@heroicons/react/solid";
 
 interface ICheckoutItem {
   product: IProduct;
@@ -31,6 +32,10 @@ export default function CheckoutForm() {
   const [orderObj, setOrderObj] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
+  const [payError, setPayError] = useState({
+    error: false,
+    message: "",
+  });
   const [payWith, setPayWith] = useState("");
   const url = window.location.host;
   const protocol = window.location.protocol;
@@ -92,6 +97,12 @@ export default function CheckoutForm() {
         );
         if (result.status) {
           window.location.assign(result.data.authorization_url);
+        } else {
+          setPayError({
+            error: true,
+            message: result.message,
+          });
+          return;
         }
       } else {
         const result = await cryptoPaymentService.chargeCrypto(paymentParams);
@@ -104,7 +115,11 @@ export default function CheckoutForm() {
         }
       }
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      setPayError({
+        error: true,
+        message: error.message,
+      });
       console.log(error);
       setLoading(false);
     } finally {
@@ -139,7 +154,7 @@ export default function CheckoutForm() {
             <div className="absolute top-0 right-0 p-4">
               <XIcon
                 className="h-6 w-6 cursor-pointer"
-                onClick={() => history.goBack()}
+                onClick={() => history.push("/")}
               />
             </div>
 
@@ -212,6 +227,18 @@ export default function CheckoutForm() {
             <h2 id="payment-and-shipping-heading" className="sr-only">
               Pay and shipping details
             </h2>
+
+            {payError.error && (
+              <PaymentError
+                message={payError.message}
+                setAction={() =>
+                  setPayError({
+                    error: false,
+                    message: "",
+                  })
+                }
+              />
+            )}
 
             <form onSubmit={handleSubmit}>
               <div className="max-w-2xl mx-auto px-4 lg:max-w-none lg:px-0">
@@ -376,5 +403,44 @@ const CheckoutItem = (props: ICheckoutItem) => {
           : product.price}
       </p>
     </li>
+  );
+};
+
+const PaymentError = ({
+  message,
+  setAction,
+}: {
+  message: string;
+  setAction: () => void;
+}) => {
+  return (
+    <div className="rounded-md bg-red-50 p-4">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <ExclamationIcon
+            className="h-5 w-5 text-red-400"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="ml-3">
+          <p className="text-sm font-medium text-red-800">{message}</p>
+        </div>
+        <div className="ml-auto pl-3">
+          <div className="-mx-1.5 -my-1.5">
+            <button
+              type="button"
+              className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600"
+            >
+              <span className="sr-only">Dismiss</span>
+              <XIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+                onClick={setAction}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
