@@ -2,7 +2,7 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on merge
-'on':
+"on":
   push:
     branches:
       - master
@@ -10,6 +10,10 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Set env
+        run: |
+          export NODE_OPTIONS=--openssl-legacy-provider
+
       - uses: actions/checkout@v2
       - run: yarn install && yarn build
         env:
@@ -26,7 +30,7 @@ jobs:
           REACT_APP_COINBASE_KEY: ${{secrets.COINBASE_KEY}}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.FIREBASE_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_VENDOR_LISTING_SHOP }}'
+          repoToken: "${{ secrets.FIREBASE_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_VENDOR_LISTING_SHOP }}"
           channelId: live
           projectId: vendor-listing-shop
