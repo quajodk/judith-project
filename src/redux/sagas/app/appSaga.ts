@@ -87,6 +87,11 @@ function* appSaga({ type, payload }: { type: string; payload: any }) {
       break;
     case REMOVE_FROM_CART:
       yield put(removeFromCart(payload));
+      const state: RootState = yield select(selector);
+      const cart = state.app.cart;
+      if (cart?.products.length === 0) {
+        yield put(clearCart());
+      }
       break;
     case SIGN_IN:
       yield put(setIsAuthenticating(true));

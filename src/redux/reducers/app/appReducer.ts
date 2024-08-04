@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DocumentReference } from "firebase/firestore/lite";
 import { uuid } from "uuidv4";
 import {
   ICategory,
@@ -21,7 +20,7 @@ interface AppState {
   adminUser: IUser | null;
   currentRoute: string;
   isAuthenticating: boolean;
-  lastDocRef?: DocumentReference;
+  lastDocRef?: string;
   total: number;
   paymentSuccess: boolean;
   categories: ICategory[];
@@ -87,57 +86,80 @@ const appReducer = createSlice({
       const product = action.payload;
 
       const cart = state.cart;
+      const xchg = state.exchangeRate;
       if (cart) {
-        state.cart = cart?.products.some((x) => x.product.id === product.id)
-          ? {
-              ...cart,
-              products: cart.products.map((x) => {
-                if (x.product.id === product.id) {
-                  return {
-                    ...x,
-                    quantity: x.quantity + 1,
-                  };
-                }
-                return x;
-              }),
-              totalPrice: cart.totalPrice + product.price,
-            }
-          : {
-              ...cart,
-              products: [...cart.products, { product, quantity: 1 }],
-              totalPrice:
-                state.countryCode.toLowerCase() !== "gh"
-                  ? (cart.totalPrice + product.price) / state.exchangeRate
-                  : cart.totalPrice + product.price,
-            };
+        let isAlreadyAdded = cart?.products.some(
+          (x) => x.product.id === product.id
+        );
+        let products = isAlreadyAdded
+          ? cart.products.map((x) => {
+              if (x.product.id === product.id) {
+                return {
+                  ...x,
+                  quantity: x.quantity + 1,
+                };
+              }
+              return x;
+            })
+          : [...cart.products, { product, quantity: 1 }];
+        state.cart = {
+          ...cart,
+          products,
+          totalPrice: Number(
+            (
+              cart.products.reduce(
+                (total, item) =>
+                  total + Number(item.product.price * item.quantity),
+                0
+              ) + product.price
+            ).toFixed(2)
+          ),
+          totalPriceUSD: Number(
+            (
+              (cart.products.reduce(
+                (total, item) =>
+                  total + Number(item.product.price * item.quantity),
+                0
+              ) +
+                product.price) /
+              xchg
+            ).toFixed(2)
+          ),
+        };
       } else {
         state.cart = {
           id: uuid(),
           products: [{ product, quantity: 1 }],
           date: new Date().toLocaleDateString(),
-          totalPrice:
-            state.countryCode.toLowerCase() !== "gh"
-              ? product.price / state.exchangeRate
-              : product.price,
+          totalPrice: product.price,
+          totalPriceUSD: Number((product.price / xchg).toFixed(3)),
         };
       }
       state.totalCartItems = state.totalCartItems + 1;
     },
     removeFromCart: (state, action: PayloadAction<IProduct>) => {
+      const productToRemove = state.cart?.products.find(
+        (x) => x.product.id === action.payload.id
+      );
+      const deductionPrice =
+        Number(productToRemove?.product.price) *
+        Number(productToRemove?.quantity);
+      const pdtPriceUSD = deductionPrice / state.exchangeRate;
       state.cart = {
         ...state.cart,
         products:
           state.cart?.products?.filter(
             (item) => item?.product.id !== action.payload.id
           ) ?? [],
-        totalPrice:
-          (state.cart?.totalPrice ?? 0) -
-          (action.payload?.price || 0) *
-            (state.cart?.products.find(
-              (x) => x.product.id === action.payload.id
-            )?.quantity ?? 0),
+        totalPrice: Number(
+          (Number(state.cart?.totalPrice ?? 0) - deductionPrice).toFixed(2)
+        ),
+        totalPriceUSD: Number(
+          (Number(state.cart?.totalPriceUSD ?? 0) - pdtPriceUSD).toFixed(2)
+        ),
       } as IOrder;
-      state.totalCartItems = state.cart?.products.length || 0;
+      state.totalCartItems =
+        state.totalCartItems === 0 ? 0 : state.totalCartItems - 1;
     },
     setNotify: (state, action: PayloadAction<boolean>) => {
       state.notify = action.payload;

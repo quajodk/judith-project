@@ -1,6 +1,5 @@
 import { IProduct } from "../../utils/models";
 import * as types from "../../utils/constants";
-import { DocumentReference } from "@firebase/firestore/dist/lite";
 
 export const addToCart = (product: IProduct) => ({
   type: types.ADD_TO_CART,
@@ -50,7 +49,7 @@ export const authStateChange = () => ({
   type: types.AUTH_STATE_CHANGE,
 });
 
-export const getProducts = (lastDoc?: DocumentReference) => ({
+export const getProducts = (lastDoc?: string) => ({
   type: types.GET_PRODUCTS,
   payload: lastDoc,
 });

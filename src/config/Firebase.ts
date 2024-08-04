@@ -18,7 +18,6 @@ import {
   addDoc,
   collection,
   doc,
-  DocumentReference,
   getDoc,
   getDocs,
   getFirestore,
@@ -141,18 +140,18 @@ class Firebase {
   public sendMail = async (mail: Record<string, any>) =>
     await addDoc(collection(this.db, "mails"), mail);
 
-  public getProducts = async (lastDocRef?: DocumentReference) => {
+  public getProducts = async (lastDocRef?: string) => {
     if (lastDocRef) {
       try {
+        const prevDoc = await getDoc(doc(this.db, "products", lastDocRef));
         const docQuery = query(
           collection(this.db, "products"),
           orderBy("createdAt"),
-          startAfter(lastDocRef),
+          startAfter(prevDoc),
           limit(12)
         );
 
         const snapshot = await getDocs(docQuery);
-        console.log(snapshot, "snapshot");
         const products = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -160,8 +159,7 @@ class Firebase {
         }));
 
         const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-        return { products, lastDoc };
+        return { products, lastDoc: lastDoc.id };
       } catch (error) {
         console.log(error);
         return error;
@@ -186,8 +184,7 @@ class Firebase {
         }));
 
         const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-        return { products, lastDoc, total };
+        return { products, lastDoc: lastDoc.id, total };
       } catch (error) {
         console.log(error);
         return error;

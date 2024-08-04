@@ -24,6 +24,7 @@ export interface IOrder {
   date: string;
   products: ICartItem[];
   totalPrice: number;
+  totalPriceUSD: number;
 }
 
 export interface IUser {

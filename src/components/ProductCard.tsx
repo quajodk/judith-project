@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useHistory } from "react-router-dom";
-import { addToCart } from "../redux/actions/appActions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { IProduct } from "../utils/models";
+import { addToCart } from "../redux/actions/appActions";
 
 interface Props {
   product: IProduct;
@@ -13,6 +13,20 @@ const ProductCard = (props: Props) => {
   const { product } = props;
   const dispatch = useAppDispatch();
   const history = useHistory();
+  const init = useRef({ dispatch });
+
+  const price = useMemo(() => {
+    if (countryCode !== "GH") {
+      let p = product.price / exchangeRate;
+      return Number(p.toFixed(2));
+    }
+    return product.price;
+  }, [countryCode, exchangeRate, product.price]);
+
+  const addItemToCart = useCallback(() => {
+    const { dispatch } = init.current;
+    dispatch(addToCart(product));
+  }, [product]);
 
   return (
     <div key={product.id}>
@@ -32,10 +46,8 @@ const ProductCard = (props: Props) => {
             {product.title}
           </h3>
           <span className="text-base font-semibold text-gray-500 flex space-x-2">
-            {countryCode.toLowerCase() !== "gh" ? "$" : product?.currency}
-            {countryCode.toLowerCase() !== "gh"
-              ? product.price / exchangeRate
-              : product.price}
+            {countryCode !== "GH" ? "$ " : `${product?.currency} `}
+            {price}
           </span>
           <span
             className={`mt-1 text-xs text-gray-500 p-0.5 ${
@@ -60,7 +72,7 @@ const ProductCard = (props: Props) => {
         <button
           type="button"
           className="relative flex bg-purple-200 border border-transparent rounded-md py-2 px-8 items-center justify-center text-sm font-medium text-gray-900 hover:bg-purple-300 w-full"
-          onClick={() => dispatch(addToCart(product))}
+          onClick={addItemToCart}
         >
           Add to cart<span className="sr-only">, {product.title}</span>
         </button>

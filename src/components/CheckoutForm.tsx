@@ -1,5 +1,5 @@
 import { XIcon } from "@heroicons/react/outline";
-import { /*useRef*/ useState } from "react";
+import { /*useRef*/ useMemo, useState } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
 import { useHistory } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
@@ -23,11 +23,11 @@ interface ICheckoutItem {
 }
 
 export default function CheckoutForm() {
-  const { cart, totalCartItems, countryCode, exchangeRate } = useAppSelector(
+  const { cart, totalCartItems, countryCode } = useAppSelector(
     (state) => state.app
   );
   const history = useHistory();
-  const { products, totalPrice } = cart as IOrder;
+  const { products, totalPrice, totalPriceUSD } = cart as IOrder;
   const [orderObj, setOrderObj] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
@@ -52,16 +52,13 @@ export default function CheckoutForm() {
       amount: totalPrice,
       currency: "GHS",
       reference: (cart?.id as string) + Date.now(),
-      channel:
-        countryCode.toLowerCase() !== "gh"
-          ? ["card"]
-          : ["card", "mobile_money"],
+      channel: countryCode !== "GH" ? ["card"] : ["card", "mobile_money"],
     };
 
     const paymentParams: ICryptoPaymentParams = {
       cancel_url: `${protocol}//${url}/checkout/${cart?.id}`,
       local_price: {
-        amount: (totalPrice / 7.5).toString(),
+        amount: totalPriceUSD.toString(),
       },
       name: `Payment for ${cart?.id}`,
       redirect_url: `${protocol}//${url}/checkout/${cart?.id}/crypto`,
@@ -146,12 +143,9 @@ export default function CheckoutForm() {
             <dl>
               <dt className="text-sm font-medium">Amount due</dt>
               <dd className="mt-1 text-3xl font-extrabold text-white">
-                {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
-                {countryCode.toLowerCase() !== "gh"
-                  ? cart?.totalPrice && cart?.totalPrice / exchangeRate
-                  : cart?.totalPrice
-                  ? cart?.totalPrice
-                  : 0.0}
+                {countryCode !== "GH"
+                  ? `$ ${cart?.totalPriceUSD ?? 0.0}`
+                  : `GHS ${cart?.totalPrice ?? 0.0}`}
               </dd>
             </dl>
 
@@ -174,24 +168,18 @@ export default function CheckoutForm() {
               <div className="flex items-center justify-between">
                 <dt>Subtotal</dt>
                 <dd>
-                  {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
-                  {countryCode.toLowerCase() !== "gh"
-                    ? cart?.totalPrice && cart?.totalPrice / exchangeRate
-                    : cart?.totalPrice
-                    ? cart?.totalPrice
-                    : 0.0}
+                  {countryCode !== "GH"
+                    ? `$ ${cart?.totalPriceUSD ?? 0.0}`
+                    : `GHS ${cart?.totalPrice ?? 0.0}`}
                 </dd>
               </div>
 
               <div className="flex items-center justify-between border-t border-white border-opacity-10 text-white pt-6">
                 <dt className="text-base">Total</dt>
                 <dd className="text-base">
-                  {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
-                  {countryCode.toLowerCase() !== "gh"
-                    ? cart?.totalPrice && cart?.totalPrice / exchangeRate
-                    : cart?.totalPrice
-                    ? cart?.totalPrice
-                    : 0.0}
+                  {countryCode !== "GH"
+                    ? `$ ${cart?.totalPriceUSD ?? 0.0}`
+                    : `GHS ${cart?.totalPrice ?? 0.0}`}
                 </dd>
               </div>
             </dl>
@@ -357,6 +345,13 @@ export default function CheckoutForm() {
 const CheckoutItem = (props: ICheckoutItem) => {
   const { product, qty } = props;
   const { countryCode, exchangeRate } = useAppSelector((state) => state.app);
+  const price = useMemo(() => {
+    if (countryCode !== "GH") {
+      let p = product.price / exchangeRate;
+      return Number(p.toFixed(2));
+    }
+    return product.price;
+  }, [countryCode, exchangeRate, product.price]);
   return (
     <li key={product.id} className="flex items-start py-6 space-x-4">
       <img
@@ -370,10 +365,7 @@ const CheckoutItem = (props: ICheckoutItem) => {
         <p>{qty ?? 1}</p>
       </div>
       <p className="flex-none text-base font-medium text-white">
-        {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
-        {countryCode.toLowerCase() !== "gh"
-          ? product.price / exchangeRate
-          : product.price}
+        {countryCode !== "GH" ? `$ ${price}` : `${product?.currency} ${price}`}
       </p>
     </li>
   );

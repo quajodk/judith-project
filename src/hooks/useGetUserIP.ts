@@ -19,7 +19,7 @@ const useGetUserIP = () => {
       .get("https://ipapi.co/json")
       .then((res) => {
         dispatch(setIpObject(res.data));
-        if (res.data.country_code !== "GH") dispatch(setExchangeRate(8.0));
+        dispatch(setExchangeRate(16.0));
         dispatch(setCountryCode(res.data.country_code));
       })
       .catch((err) => {

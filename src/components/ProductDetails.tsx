@@ -4,13 +4,25 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { useHistory, useParams } from "react-router-dom";
 import useGetProduct from "../hooks/useGetProduct";
 import { addToCart } from "../redux/actions/appActions";
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useMemo } from "react";
 
 export default function ProductDetails() {
   const dispatch = useAppDispatch();
   const id = useParams<{ id: string }>().id;
   const { loading, product, error } = useGetProduct(id);
+  const { countryCode, exchangeRate } = useAppSelector((state) => state.app);
   const history = useHistory();
+
+  const price = useMemo(() => {
+    if (product) {
+      if (countryCode !== "GH") {
+        let p = product.price / exchangeRate;
+        return Number(p.toFixed(2));
+      }
+      return product.price;
+    }
+  }, [countryCode, exchangeRate, product]);
 
   if (loading) {
     return (
@@ -70,7 +82,8 @@ export default function ProductDetails() {
 
             <div className="flex items-center">
               <p className="text-lg text-gray-900 sm:text-xl">
-                {product?.currency} {product?.price}
+                {countryCode !== "GH" ? "$ " : `${product?.currency} `}
+                {price}
               </p>
             </div>
 

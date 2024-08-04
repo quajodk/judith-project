@@ -16,9 +16,7 @@ interface CartProps {
 export default function Cart(props: CartProps) {
   const { open, setOpen } = props;
   const dispatch = useAppDispatch();
-  const { cart, countryCode, exchangeRate } = useAppSelector(
-    (state) => state.app
-  );
+  const { cart, countryCode } = useAppSelector((state) => state.app);
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -97,12 +95,9 @@ export default function Cart(props: CartProps) {
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Subtotal</p>
                       <p>
-                        {countryCode.toLowerCase() !== "gh" ? "$" : "GHS"}{" "}
-                        {countryCode.toLowerCase() !== "gh"
-                          ? cart?.totalPrice && cart?.totalPrice / exchangeRate
-                          : cart?.totalPrice
-                          ? cart?.totalPrice
-                          : 0.0}
+                        {countryCode !== "GH"
+                          ? `$ ${cart?.totalPriceUSD ?? 0.0}`
+                          : `GHS ${cart?.totalPrice ?? 0.0}`}
                       </p>
                     </div>
                     <p className="mt-0.5 text-sm text-gray-500">
