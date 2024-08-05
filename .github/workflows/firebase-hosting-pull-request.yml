@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set env
-        run: |
-          export NODE_OPTIONS=--openssl-legacy-provider
+        run: NODE_OPTIONS=--openssl-legacy-provider
       - name: checkout repo
         uses: actions/checkout@v2
 

@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@master
 
       - name: Set env
-        run: export NODE_OPTIONS=--openssl-legacy-provider
+        run: NODE_OPTIONS=--openssl-legacy-provider
 
       - name: Install Dependencies
         run: npm install
