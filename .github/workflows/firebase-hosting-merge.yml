@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set env
-        run: |
-          export NODE_OPTIONS=--openssl-legacy-provider
+        run: export NODE_OPTIONS=--openssl-legacy-provider
 
       - uses: actions/checkout@v2
       - run: yarn install && yarn build

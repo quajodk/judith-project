@@ -11,11 +11,13 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
+
+      - name: Set env
+        run: export NODE_OPTIONS=--openssl-legacy-provider
+
       - name: Install Dependencies
         run: npm install
-      - name: Set env
-        run: |
-          export NODE_OPTIONS=--openssl-legacy-provider
+
       - name: Build
         run: npm run build
         env:
